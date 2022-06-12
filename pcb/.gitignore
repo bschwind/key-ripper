@@ -1,0 +1,10 @@
+*.bak
+*.sch-bak
+*.kicad_pcb-bak
+*.kicad_prl
+*.bck
+fp-info-cache
+*-cache.lib
+.DS_Store
+_autosave-key-ripper.kicad_pcb
+key-ripper-backups/
