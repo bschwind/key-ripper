@@ -39,3 +39,8 @@ Use 1608 metric (0603 imperial) footprints for all capacitors and resistors wher
     X322512MSB4SI
     C9002
     https://datasheet.lcsc.com/lcsc/2103291203_Yangxing-Tech-X322512MSB4SI_C9002.pdf
+
+1x 16MB QSPI Flash
+    W25Q128JVSIQ
+    C97521
+    https://datasheet.lcsc.com/lcsc/1811142111_Winbond-Elec-W25Q128JVSIQ_C97521.pdf
