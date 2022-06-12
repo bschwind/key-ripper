@@ -34,3 +34,8 @@ Use 1608 metric (0603 imperial) footprints for all capacitors and resistors wher
     Extended Part
     TLC-PSMD050
     https://datasheet.lcsc.com/szlcsc/TLC-Electronic-TLC-PSMD050_C261942.pdf
+
+1x Crystal Resonator (12MHz)
+    X322512MSB4SI
+    C9002
+    https://datasheet.lcsc.com/lcsc/2103291203_Yangxing-Tech-X322512MSB4SI_C9002.pdf
