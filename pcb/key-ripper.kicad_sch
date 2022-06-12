@@ -3038,7 +3038,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid aabf2142-4837-4ff0-8288-44808f10d2ad)
   )
-  (text "Seerial Wire Debug" (at 171.45 139.065 0)
+  (text "Serial Wire Debug" (at 171.45 139.065 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid f7827c1d-1eae-4ba2-821e-82d19b3280ba)
   )
