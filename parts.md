@@ -35,7 +35,7 @@ Use 1608 metric (0603 imperial) footprints for all capacitors and resistors wher
     TLC-PSMD050
     https://datasheet.lcsc.com/szlcsc/TLC-Electronic-TLC-PSMD050_C261942.pdf
 
-1x Crystal Resonator (12MHz)
+1x Crystal Resonator (12MHz, 20pF load)
     X322512MSB4SI
     C9002
     https://datasheet.lcsc.com/lcsc/2103291203_Yangxing-Tech-X322512MSB4SI_C9002.pdf
@@ -54,3 +54,8 @@ Nx Diodes
     1N4148W
     C81598 SOD-123
     https://datasheet.lcsc.com/lcsc/1811061725_ST-Semtech-1N4148W_C81598.pdf
+
+2x tactile switch
+    TS-1187A-B-A-B
+    C318884
+    https://datasheet.lcsc.com/lcsc/2002271431_XKB-Connectivity-TS-1187A-B-A-B_C318884.pdf
