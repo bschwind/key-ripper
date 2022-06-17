@@ -44,3 +44,8 @@ Use 1608 metric (0603 imperial) footprints for all capacitors and resistors wher
     W25Q128JVSIQ
     C97521
     https://datasheet.lcsc.com/lcsc/1811142111_Winbond-Elec-W25Q128JVSIQ_C97521.pdf
+
+Nx Kailh Hotswap Sockets
+    CPG151101S11
+    C2803348
+    https://jlcpcb.com/parts/componentSearch?isSearch=true&searchTxt=CPG151101S11
