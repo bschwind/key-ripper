@@ -49,3 +49,8 @@ Nx Kailh Hotswap Sockets
     CPG151101S11
     C2803348
     https://jlcpcb.com/parts/componentSearch?isSearch=true&searchTxt=CPG151101S11
+
+Nx Diodes
+    1N4148W
+    C81598 SOD-123
+    https://datasheet.lcsc.com/lcsc/1811061725_ST-Semtech-1N4148W_C81598.pdf
