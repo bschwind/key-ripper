@@ -1,6 +1,6 @@
 # Parts List
 
-Use 1608 metric (0603 imperial) footprints for all capacitors and resistors where possible.
+Use 0402 metric (1005 imperial) footprints for all capacitors and resistors where possible.
 
 ## JLCPCB Parts
 
