@@ -4723,10 +4723,10 @@
     (property "LCSC" "C165948" (id 4) (at 36.1609 118.11 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd5f))
-    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd5f))
-    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd5f))
-    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd5f))
+    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd62))
+    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd62))
+    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd62))
+    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd62))
     (pin "A1" (uuid 716c8bd1-edb9-492a-815e-7cef2bfb0225))
     (pin "A12" (uuid dcf4709e-0aca-422a-9638-11a3010d6771))
     (pin "A4" (uuid 9a2f09b2-7228-4ffc-9140-70464ab83241))
@@ -5863,7 +5863,7 @@
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 7a69d6fe-7973-4dc9-9df9-c8dcf9e8b078)
     (property "Reference" "SW41" (id 0) (at 229.87 41.91 0))
-    (property "Value" "BACKSLASH" (id 1) (at 229.87 44.45 0))
+    (property "Value" "\\" (id 1) (at 229.87 44.45 0))
     (property "Footprint" "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.50u" (id 2) (at 229.87 44.45 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -6253,7 +6253,7 @@
     (in_bom yes) (on_board yes)
     (uuid a2ea1d89-2319-4e89-804e-139e25599a5f)
     (property "Reference" "SW65" (id 0) (at 199.39 67.31 0))
-    (property "Value" "FWD_SLASH" (id 1) (at 198.12 69.85 0))
+    (property "Value" "/" (id 1) (at 198.12 69.85 0))
     (property "Footprint" "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u" (id 2) (at 199.39 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -6322,7 +6322,7 @@
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid aab53e21-b21f-4d92-85bb-8417588d20bc)
     (property "Reference" "SW26" (id 0) (at 214.63 29.21 0))
-    (property "Value" "+" (id 1) (at 214.63 31.75 0))
+    (property "Value" "=" (id 1) (at 214.63 31.75 0))
     (property "Footprint" "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u" (id 2) (at 214.63 31.75 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -8248,7 +8248,7 @@
       (reference "SW25") (unit 1) (value "-") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u")
     )
     (path "/aab53e21-b21f-4d92-85bb-8417588d20bc"
-      (reference "SW26") (unit 1) (value "+") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u")
+      (reference "SW26") (unit 1) (value "=") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u")
     )
     (path "/5bb9af28-7152-47d8-b0f0-f72e52c977fa"
       (reference "SW27") (unit 1) (value "BACKSPACE") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_2.00u")
@@ -8293,7 +8293,7 @@
       (reference "SW40") (unit 1) (value "]") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u")
     )
     (path "/7a69d6fe-7973-4dc9-9df9-c8dcf9e8b078"
-      (reference "SW41") (unit 1) (value "BACKSLASH") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.50u")
+      (reference "SW41") (unit 1) (value "\\") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.50u")
     )
     (path "/e2a1f767-222e-427f-86d9-edbcee5a8109"
       (reference "SW42") (unit 1) (value "CAPS") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.75u")
@@ -8365,7 +8365,7 @@
       (reference "SW64") (unit 1) (value ".") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u")
     )
     (path "/a2ea1d89-2319-4e89-804e-139e25599a5f"
-      (reference "SW65") (unit 1) (value "FWD_SLASH") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u")
+      (reference "SW65") (unit 1) (value "/") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u")
     )
     (path "/00647e3f-5f42-4695-854e-ff5ad3d6436e"
       (reference "SW66") (unit 1) (value "UP") (footprint "Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u")
