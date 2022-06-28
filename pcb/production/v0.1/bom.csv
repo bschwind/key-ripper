@@ -1,97 +1,97 @@
 Designator,Quantity,Value,Footprint,LCSC Part #
-"C1, C2, C4, C5,",4,1uF,Capacitor_SMD:C_0402_1005Metric,C52923
-"C3, C18,",2,0.1 uF,Capacitor_SMD:C_0402_1005Metric,C307331
-"C6, C7,",2,30pF,Capacitor_SMD:C_0402_1005Metric,C1570
-"C8, C9, C10, C11, C12, C13, C14, C15, C16, C17,",10,100nF,Capacitor_SMD:C_0402_1005Metric,C307331
-"D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13, D14, D15, D16, D17, D18, D19, D20, D21, D22, D23, D24, D25, D26, D27, D28, D29, D30, D31, D32, D33, D34, D35, D36, D37, D38, D39, D40, D41, D42, D43, D44, D45, D46, D47, D48, D49, D50, D51, D52, D53, D54, D55, D56, D57, D58, D59, D60, D61, D62, D63, D64, D65, D66, D67, D68, D69, D70, D71, D72, D73, D74, D75,",75,D_Small,Diode_SMD:D_SOD-123,C81598
-"D76,",1,Schottky 5819W,Diode_SMD:D_SOD-123,C8598
-"D77,",1,Power LED (Green),LED_SMD:LED_0805_2012Metric,C2297
-"F1,",1,TLC_PSMD050,Fuse:Fuse_0805_2012Metric,C261942
-"FB1,",1,100@100MHz,Inductor_SMD:L_0805_2012Metric,C1015
-"R1, R2,",2,27 ohm,Resistor_SMD:R_0603_1608Metric,C25190
-"R3, R5,",2,1k ohm,Resistor_SMD:R_0402_1005Metric,C11702
-"R4, R8,",2,10k ohm,Resistor_SMD:R_0402_1005Metric,C25744
-"R6, R7,",2,5.1k,Resistor_SMD:R_0402_1005Metric,C25905
-"R9,",1,1k5 ohm,Resistor_SMD:R_0402_1005Metric,C25867
-"SW1,",1,ESC,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW2,",1,F1,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW3,",1,F2,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW4,",1,F3,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW5,",1,F4,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW6,",1,F5,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW7,",1,F6,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW8,",1,F7,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW9,",1,F8,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW10,",1,F9,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW11,",1,F10,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW12,",1,F11,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW13,",1,F12,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW14,",1,TILDE,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW15,",1,1,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW16,",1,2,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW17,",1,3,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW18,",1,4,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW19,",1,5,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW20,",1,6,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW21,",1,7,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW22,",1,8,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW23,",1,9,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW24,",1,0,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW25,",1,-,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW26,",1,=,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW27,",1,BACKSPACE,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_2.00u,C2803348
-"SW28,",1,TAB,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.50u,C2803348
-"SW29,",1,Q,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW30,",1,W,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW31,",1,E,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW32,",1,R,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW33,",1,T,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW34,",1,Y,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW35,",1,U,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW36,",1,I,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW37,",1,O,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW38,",1,P,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW39,",1,[,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW40,",1,],Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW41,",1,\,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.50u,C2803348
-"SW42,",1,CAPS,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.75u,C2803348
-"SW43,",1,A,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW44,",1,S,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW45,",1,D,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW46,",1,F,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW47,",1,G,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW48,",1,H,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW49,",1,J,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW50,",1,K,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW51,",1,L,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW52,",1,;,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW53,",1,',Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW54,",1,ENTER,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_2.25u,C2803348
-"SW55,",1,L_SHIFT,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_2.25u,C2803348
-"SW56,",1,Z,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW57,",1,X,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW58,",1,C,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW59,",1,V,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW60,",1,B,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW61,",1,N,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW62,",1,M,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW63,",1,",",Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW64,",1,.,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW65,",1,/,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW66,",1,UP,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW67,",1,FN,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW68,",1,BL_CTRL,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW69,",1,L_ALT,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW70,",1,L_CMD,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.25u,C2803348
-"SW71,",1,SPACE,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_6.25u,C2803348
-"SW72,",1,R_CMD,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.25u,C2803348
-"SW73,",1,LEFT,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW74,",1,DOWN,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"SW75,",1,RIGHT,Switch_Keyboard_Hotswap_Kailh:SW_Hotswap_Kailh_MX_1.00u,C2803348
-"U1,",1,RP2040,footprints:rp2040,C2040
-"U2,",1,TYPE-C-31-M-12,footprints:simple-usb-c,C165948
-"U3,",1,XC6206PxxxMR,Package_TO_SOT_SMD:SOT-23,C5446
-"U4,",1,W25Q128JVS,Package_SO:SOIC-8_5.23x5.23mm_P1.27mm,C97521
-"U5,",1,USB Boot,footprints:tactile-switch,C318884
-"U6,",1,Reset,footprints:tactile-switch,C318884
-"Y1,",1,12MHz - 20pF,Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm,C9002
+"C1, C2, C4, C5,",4,1uF,0402,C52923
+"C3, C18,",2,0.1 uF,0402,C307331
+"C6, C7,",2,30pF,0402,C1570
+"C8, C9, C10, C11, C12, C13, C14, C15, C16, C17,",10,100nF,0402,C307331
+"D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13, D14, D15, D16, D17, D18, D19, D20, D21, D22, D23, D24, D25, D26, D27, D28, D29, D30, D31, D32, D33, D34, D35, D36, D37, D38, D39, D40, D41, D42, D43, D44, D45, D46, D47, D48, D49, D50, D51, D52, D53, D54, D55, D56, D57, D58, D59, D60, D61, D62, D63, D64, D65, D66, D67, D68, D69, D70, D71, D72, D73, D74, D75,",75,D_Small,SOD-123,C81598
+"D76,",1,Schottky 5819W,SOD-123,C8598
+"D77,",1,Power LED (Green),LED_0805,C2297
+"F1,",1,TLC_PSMD050,0805,C261942
+"FB1,",1,100@100MHz,0805,C1015
+"R1, R2,",2,27 ohm,0603,C25190
+"R3, R5,",2,1k ohm,0402,C11702
+"R4, R8,",2,10k ohm,0402,C25744
+"R6, R7,",2,5.1k,0402,C25905
+"R9,",1,1k5 ohm,0402,C25867
+"SW1,",1,ESC,SMD,C2803348
+"SW2,",1,F1,SMD,C2803348
+"SW3,",1,F2,SMD,C2803348
+"SW4,",1,F3,SMD,C2803348
+"SW5,",1,F4,SMD,C2803348
+"SW6,",1,F5,SMD,C2803348
+"SW7,",1,F6,SMD,C2803348
+"SW8,",1,F7,SMD,C2803348
+"SW9,",1,F8,SMD,C2803348
+"SW10,",1,F9,SMD,C2803348
+"SW11,",1,F10,SMD,C2803348
+"SW12,",1,F11,SMD,C2803348
+"SW13,",1,F12,SMD,C2803348
+"SW14,",1,TILDE,SMD,C2803348
+"SW15,",1,1,SMD,C2803348
+"SW16,",1,2,SMD,C2803348
+"SW17,",1,3,SMD,C2803348
+"SW18,",1,4,SMD,C2803348
+"SW19,",1,5,SMD,C2803348
+"SW20,",1,6,SMD,C2803348
+"SW21,",1,7,SMD,C2803348
+"SW22,",1,8,SMD,C2803348
+"SW23,",1,9,SMD,C2803348
+"SW24,",1,0,SMD,C2803348
+"SW25,",1,-,SMD,C2803348
+"SW26,",1,=,SMD,C2803348
+"SW27,",1,BACKSPACE,SMD,C2803348
+"SW28,",1,TAB,SMD,C2803348
+"SW29,",1,Q,SMD,C2803348
+"SW30,",1,W,SMD,C2803348
+"SW31,",1,E,SMD,C2803348
+"SW32,",1,R,SMD,C2803348
+"SW33,",1,T,SMD,C2803348
+"SW34,",1,Y,SMD,C2803348
+"SW35,",1,U,SMD,C2803348
+"SW36,",1,I,SMD,C2803348
+"SW37,",1,O,SMD,C2803348
+"SW38,",1,P,SMD,C2803348
+"SW39,",1,[,SMD,C2803348
+"SW40,",1,],SMD,C2803348
+"SW41,",1,\,SMD,C2803348
+"SW42,",1,CAPS,SMD,C2803348
+"SW43,",1,A,SMD,C2803348
+"SW44,",1,S,SMD,C2803348
+"SW45,",1,D,SMD,C2803348
+"SW46,",1,F,SMD,C2803348
+"SW47,",1,G,SMD,C2803348
+"SW48,",1,H,SMD,C2803348
+"SW49,",1,J,SMD,C2803348
+"SW50,",1,K,SMD,C2803348
+"SW51,",1,L,SMD,C2803348
+"SW52,",1,;,SMD,C2803348
+"SW53,",1,',SMD,C2803348
+"SW54,",1,ENTER,SMD,C2803348
+"SW55,",1,L_SHIFT,SMD,C2803348
+"SW56,",1,Z,SMD,C2803348
+"SW57,",1,X,SMD,C2803348
+"SW58,",1,C,SMD,C2803348
+"SW59,",1,V,SMD,C2803348
+"SW60,",1,B,SMD,C2803348
+"SW61,",1,N,SMD,C2803348
+"SW62,",1,M,SMD,C2803348
+"SW63,",1,",",SMD,C2803348
+"SW64,",1,.,SMD,C2803348
+"SW65,",1,/,SMD,C2803348
+"SW66,",1,UP,SMD,C2803348
+"SW67,",1,FN,SMD,C2803348
+"SW68,",1,BL_CTRL,SMD,C2803348
+"SW69,",1,L_ALT,SMD,C2803348
+"SW70,",1,L_CMD,SMD,C2803348
+"SW71,",1,SPACE,SMD,C2803348
+"SW72,",1,R_CMD,SMD,C2803348
+"SW73,",1,LEFT,SMD,C2803348
+"SW74,",1,DOWN,SMD,C2803348
+"SW75,",1,RIGHT,SMD,C2803348
+"U1,",1,RP2040,LQFN-56_EP_7.0x7.0x0.4P,C2040
+"U2,",1,TYPE-C-31-M-12,TYPE-C-31_L8.94_W7.3,C165948
+"U3,",1,XC6206PxxxMR,SOT-23-3L,C5446
+"U4,",1,W25Q128JVS,SOIC-8_5.3x5.3x1.27P,C97521
+"U5,",1,USB Boot,SMD-SW-4_5.1x5.1x1.5,C318884
+"U6,",1,Reset,SMD-SW-4_5.1x5.1x1.5,C318884
+"Y1,",1,12MHz - 20pF,SMD-3225_4P,C9002
