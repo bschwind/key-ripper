@@ -8,7 +8,7 @@ Designator,Quantity,Value,Footprint,LCSC Part #
 "D77,",1,Power LED (Green),LED_SMD:LED_0805_2012Metric,C2297
 "F1,",1,TLC_PSMD050,Fuse:Fuse_0805_2012Metric,C261942
 "FB1,",1,100@100MHz,Inductor_SMD:L_0805_2012Metric,C1015
-"R1, R2,",2,27 ohm,Resistor_SMD:R_0402_1005Metric,C25190
+"R1, R2,",2,27 ohm,Resistor_SMD:R_0603_1608Metric,C25190
 "R3, R5,",2,1k ohm,Resistor_SMD:R_0402_1005Metric,C11702
 "R4, R8,",2,10k ohm,Resistor_SMD:R_0402_1005Metric,C25744
 "R6, R7,",2,5.1k,Resistor_SMD:R_0402_1005Metric,C25905
