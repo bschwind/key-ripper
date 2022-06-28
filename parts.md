@@ -63,3 +63,36 @@ Nx Diodes
     TS-1187A-B-A-B
     C318884
     https://datasheet.lcsc.com/lcsc/2002271431_XKB-Connectivity-TS-1187A-B-A-B_C318884.pdf
+
+1 uF C
+    0402 footprint
+    50V 1uF X7R ±10% 0805  Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS
+    C52923
+
+0.1uF (100nF) C
+    50V 100nF X7R ±10% 0402  Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS
+    C307331
+
+30 pF C
+    50V 30pF C0G ±5% 0402  Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS
+    C1570
+
+27 ohm R
+    1/10W Thick Film Resistors 75V ±1% ±200ppm/℃ -55℃~+155℃ 27Ω 0603  Chip Resistor - Surface Mount ROHS
+    C25190
+
+1k ohm R
+    1/16W Thick Film Resistors 50V ±1% ±100ppm/℃ -55℃~+155℃ 5.1kΩ 0402  Chip Resistor - Surface Mount ROHS
+    C11702
+
+10k ohm R
+    1/16W Thick Film Resistors 50V ±1% ±100ppm/℃ -55℃~+155℃ 10kΩ 0402  Chip Resistor - Surface Mount ROHS
+    C25744
+
+5.1k ohm R
+    1/16W Thick Film Resistors 50V ±1% ±100ppm/℃ -55℃~+155℃ 5.1kΩ 0402  Chip Resistor - Surface Mount ROHS
+    C25905
+
+1.5k ohm R
+    1/16W Thick Film Resistors 50V ±1% ±100ppm/℃ -55℃~+155℃ 1.5kΩ 0402  Chip Resistor - Surface Mount ROHS
+    C25867
