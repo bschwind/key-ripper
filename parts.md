@@ -23,16 +23,19 @@ Use 0402 metric (1005 imperial) footprints for all capacitors and resistors wher
 1x Schottky Diode
     Basic Part
     5819W SOD-123
+    C8598
     https://datasheet.lcsc.com/szlcsc/Changjiang-Electronics-Tech-CJ-B5819W_C8598.pdf
 
 1x Ferrite Bead
     Basic Part
     Sunlord GZ2012D101TF
+    C1015
     https://datasheet.lcsc.com/szlcsc/Sunlord-GZ2012D101TF_C1015.pdf
 
 1x Resettable Fuse
     Extended Part
     TLC-PSMD050
+    C261942
     https://datasheet.lcsc.com/szlcsc/TLC-Electronic-TLC-PSMD050_C261942.pdf
 
 1x Crystal Resonator (12MHz, 20pF load)
@@ -52,7 +55,8 @@ Nx Kailh Hotswap Sockets
 
 Nx Diodes
     1N4148W
-    C81598 SOD-123
+    C81598
+    SOD-123
     https://datasheet.lcsc.com/lcsc/1811061725_ST-Semtech-1N4148W_C81598.pdf
 
 2x tactile switch
