@@ -151,15 +151,7 @@ fn main() -> ! {
         if scan_countdown.wait().is_ok() {
             // Scan the keys and send a report.
             let matrix = scan_keys(rows, cols, &mut delay);
-
-            let keycodes = if matrix[12][1] {
-                // The equals sign.
-                [0x2E, 0, 0, 0, 0, 0]
-            } else {
-                [0, 0, 0, 0, 0, 0]
-            };
-
-            let report = KeyboardReport { modifier: 0, reserved: 0, leds: 0, keycodes };
+            let report = report_from_matrix(&matrix);
 
             hid_endpoint.push_input(&report).ok();
         }
@@ -188,4 +180,27 @@ fn scan_keys(
     }
 
     matrix
+}
+
+fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
+    let mut keycodes = [0; 6];
+    let mut keycode_index = 0;
+
+    let mut push_keycode = |key| {
+        if keycode_index < keycodes.len() {
+            keycodes[keycode_index] = key;
+            keycode_index += 1;
+        }
+    };
+
+    for (matrix_column, mapping_column) in matrix.iter().zip(MATRIX_MAPPING) {
+        for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
+            if *key_pressed {
+                // TODO - Handle modifier keys.
+                push_keycode(mapping_row as u8);
+            }
+        }
+    }
+
+    KeyboardReport { modifier: 0, reserved: 0, leds: 0, keycodes }
 }
