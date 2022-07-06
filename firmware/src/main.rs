@@ -130,9 +130,9 @@ fn main() -> ! {
             // Scan the keys and send a report.
             let matrix = scan_keys(rows, cols, &mut delay);
 
-            let keycodes = if matrix[1][3] {
-                // The letter A
-                [0x04, 0, 0, 0, 0, 0]
+            let keycodes = if matrix[12][1] {
+                // The equals sign.
+                [0x2E, 0, 0, 0, 0, 0]
             } else {
                 [0, 0, 0, 0, 0, 0]
             };
@@ -150,8 +150,8 @@ fn scan_keys(
     rows: &[&dyn InputPin<Error = Infallible>],
     columns: &mut [&mut dyn embedded_hal::digital::v2::OutputPin<Error = Infallible>],
     delay: &mut Delay,
-) -> [[bool; 14]; 6] {
-    let mut matrix = [[false; 14]; 6];
+) -> [[bool; 6]; 14] {
+    let mut matrix = [[false; 6]; 14];
 
     for (gpio_col, matrix_col) in columns.iter_mut().zip(matrix.iter_mut()) {
         gpio_col.set_high().unwrap();
