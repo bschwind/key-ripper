@@ -11,8 +11,9 @@ use embedded_hal::{
     timer::CountDown,
 };
 use embedded_time::duration::Extensions;
+use keycodes::KeyCode;
 use panic_reset as _;
-use rp2040_hal::{usb::UsbBus, Clock, Watchdog};
+use rp2040_hal::{pac, usb::UsbBus, Clock, Watchdog};
 use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid};
 use usbd_hid::{
     descriptor::{KeyboardReport, SerializedDescriptor},
@@ -21,13 +22,41 @@ use usbd_hid::{
     },
 };
 
-use rp2040_hal::pac;
-
 /// The linker will place this boot block at the start of our program image. We
 /// need this to help the ROM bootloader get our code up and running.
 #[link_section = ".boot2"]
 #[used]
 pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
+
+mod keycodes;
+
+const NUM_COLS: usize = 14;
+const NUM_ROWS: usize = 6;
+
+// TODO - Finish filling this out.
+const MATRIX_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] = [
+    [
+        KeyCode::Escape,
+        KeyCode::Tilde,
+        KeyCode::Tab,
+        KeyCode::CapsLock,
+        KeyCode::LeftShift,
+        KeyCode::Fn,
+    ],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+    [KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A, KeyCode::A],
+];
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
@@ -62,7 +91,7 @@ fn main() -> ! {
 
     let bus_allocator = UsbBusAllocator::new(usb_bus);
 
-    let poll_ms = 10;
+    let poll_ms = 8;
     let mut hid_endpoint = HIDClass::new_with_settings(
         &bus_allocator,
         KeyboardReport::desc(),
@@ -120,7 +149,7 @@ fn main() -> ! {
     let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS);
     let mut scan_countdown = timer.count_down();
 
-    scan_countdown.start(10.milliseconds());
+    scan_countdown.start(8.milliseconds());
 
     // Main keyboard polling loop.
     loop {
@@ -150,8 +179,8 @@ fn scan_keys(
     rows: &[&dyn InputPin<Error = Infallible>],
     columns: &mut [&mut dyn embedded_hal::digital::v2::OutputPin<Error = Infallible>],
     delay: &mut Delay,
-) -> [[bool; 6]; 14] {
-    let mut matrix = [[false; 6]; 14];
+) -> [[bool; NUM_ROWS]; NUM_COLS] {
+    let mut matrix = [[false; NUM_ROWS]; NUM_COLS];
 
     for (gpio_col, matrix_col) in columns.iter_mut().zip(matrix.iter_mut()) {
         gpio_col.set_high().unwrap();
