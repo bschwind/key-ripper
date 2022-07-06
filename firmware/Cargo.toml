@@ -1,12 +1,16 @@
 [package]
 name = "key-ripper"
 version = "0.1.0"
+authors = ["Brian Schwind <brianmschwind@gmail.com>"]
 edition = "2021"
 
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
 embedded-hal = "0.2"
+embedded-time = "0.12"
 panic-reset = "0.1"
 rp2040-boot2 = "0.2"
 rp2040-hal = "0.5"
+usb-device = "0.2"
+usbd-hid = "0.6"
