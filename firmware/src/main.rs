@@ -41,7 +41,7 @@ const MATRIX_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] = [
     [KeyCode::F3, KeyCode::Num3, KeyCode::E, KeyCode::D, KeyCode::X, KeyCode::LeftCmd],
     [KeyCode::F4, KeyCode::Num4, KeyCode::R, KeyCode::F, KeyCode::C, KeyCode::Empty],
     [KeyCode::F5, KeyCode::Num5, KeyCode::T, KeyCode::G, KeyCode::V, KeyCode::Empty],
-    [KeyCode::Empty, KeyCode::Num6, KeyCode::Y, KeyCode::H, KeyCode::B, KeyCode::Space], // col 6, row 5
+    [KeyCode::Empty, KeyCode::Num6, KeyCode::Y, KeyCode::H, KeyCode::B, KeyCode::Space],
     [KeyCode::F6, KeyCode::Num7, KeyCode::U, KeyCode::J, KeyCode::N, KeyCode::Empty],
     [KeyCode::F7, KeyCode::Num8, KeyCode::I, KeyCode::K, KeyCode::M, KeyCode::Empty],
     [KeyCode::F8, KeyCode::Num9, KeyCode::O, KeyCode::L, KeyCode::Comma, KeyCode::Empty],
