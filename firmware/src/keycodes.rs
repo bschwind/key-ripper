@@ -1,3 +1,4 @@
+#[allow(unused)]
 #[repr(u8)]
 pub enum KeyCode {
     Empty = 0x0,
@@ -79,4 +80,23 @@ pub enum KeyCode {
     LeftAlt = 0xF3,
     LeftCmd = 0xF4,
     RightCmd = 0xF5,
+    RightAlt = 0xF6,
+    RightCtrl = 0xF7,
+    RightShift = 0xF8,
+}
+
+impl KeyCode {
+    pub fn modifier_bitmask(&self) -> Option<u8> {
+        match *self {
+            KeyCode::LeftCtrl => Some(1 << 0),
+            KeyCode::LeftShift => Some(1 << 1),
+            KeyCode::LeftAlt => Some(1 << 2),
+            KeyCode::LeftCmd => Some(1 << 3),
+            KeyCode::RightCtrl => Some(1 << 4),
+            KeyCode::RightShift => Some(1 << 5),
+            KeyCode::RightAlt => Some(1 << 6),
+            KeyCode::RightCmd => Some(1 << 7),
+            _ => None,
+        }
+    }
 }

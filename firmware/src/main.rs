@@ -184,8 +184,9 @@ fn scan_keys(
 }
 
 fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
-    let mut keycodes = [0; 6];
+    let mut keycodes = [0u8; 6];
     let mut keycode_index = 0;
+    let mut modifier = 0;
 
     let mut push_keycode = |key| {
         if keycode_index < keycodes.len() {
@@ -197,11 +198,14 @@ fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
     for (matrix_column, mapping_column) in matrix.iter().zip(MATRIX_MAPPING) {
         for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
             if *key_pressed {
-                // TODO - Handle modifier keys.
-                push_keycode(mapping_row as u8);
+                if let Some(bitmask) = mapping_row.modifier_bitmask() {
+                    modifier |= bitmask;
+                } else {
+                    push_keycode(mapping_row as u8);
+                }
             }
         }
     }
 
-    KeyboardReport { modifier: 0, reserved: 0, leds: 0, keycodes }
+    KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
 }
