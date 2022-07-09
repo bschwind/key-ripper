@@ -178,27 +178,13 @@ fn main() -> ! {
                         info!("UsbError::WouldBlock");
                         scan_countdown.start(100.milliseconds());
                     },
-                    UsbError::ParseError => {
-                        error!("UsbError::ParseError");
-                    },
-                    UsbError::BufferOverflow => {
-                        error!("UsbError::BufferOverflow");
-                    },
-                    UsbError::EndpointOverflow => {
-                        error!("UsbError::EndpointOverflow");
-                    },
-                    UsbError::EndpointMemoryOverflow => {
-                        error!("UsbError::EndpointMemoryOverflow");
-                    },
-                    UsbError::InvalidEndpoint => {
-                        error!("UsbError::InvalidEndpoint");
-                    },
-                    UsbError::Unsupported => {
-                        error!("UsbError::Unsupported");
-                    },
-                    UsbError::InvalidState => {
-                        error!("UsbError::InvalidState");
-                    },
+                    UsbError::ParseError => error!("UsbError::ParseError"),
+                    UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
+                    UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
+                    UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
+                    UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
+                    UsbError::Unsupported => error!("UsbError::Unsupported"),
+                    UsbError::InvalidState => error!("UsbError::InvalidState"),
                 },
             }
         }
