@@ -6,7 +6,7 @@
 
 use core::convert::Infallible;
 use cortex_m::delay::Delay;
-use defmt::{info, error};
+use defmt::{error, info};
 use defmt_rtt as _;
 use embedded_hal::{
     digital::v2::{InputPin, OutputPin},
@@ -19,7 +19,7 @@ use panic_probe as _;
 use rp2040_hal::{pac, usb::UsbBus, Clock, Watchdog};
 use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid, UsbError};
 use usbd_hid::{
-    descriptor::{KeyboardReport},
+    descriptor::KeyboardReport,
     hid_class::{
         HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
     },
@@ -30,7 +30,6 @@ use usbd_hid::{
 #[link_section = ".boot2"]
 #[used]
 pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
-
 
 mod hid_descriptor;
 mod keycodes;
@@ -156,7 +155,7 @@ fn main() -> ! {
     let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS);
     let mut scan_countdown = timer.count_down();
 
-    // Start on a 500ms countdown to give the USB
+    // Start on a 500ms countdown so the USB endpoint writes don't block.
     scan_countdown.start(500.milliseconds());
 
     info!("Start main loop");
