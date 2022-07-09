@@ -1,5 +1,8 @@
+use defmt::Format;
+
 #[allow(unused)]
 #[repr(u8)]
+#[derive(Format)]
 pub enum KeyCode {
     Empty = 0x0,
     A = 0x04,
