@@ -6,7 +6,7 @@
 
 use core::convert::Infallible;
 use cortex_m::delay::Delay;
-use defmt::info;
+use defmt::{error, info};
 use defmt_rtt as _;
 use embedded_hal::{
     digital::v2::{InputPin, OutputPin},
@@ -17,9 +17,9 @@ use keycodes::KeyCode;
 // use panic_reset as _;
 use panic_probe as _;
 use rp2040_hal::{pac, usb::UsbBus, Clock, Watchdog};
-use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid};
+use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid, UsbError};
 use usbd_hid::{
-    descriptor::{KeyboardReport, SerializedDescriptor},
+    descriptor::KeyboardReport,
     hid_class::{
         HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
     },
@@ -31,6 +31,7 @@ use usbd_hid::{
 #[used]
 pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
 
+mod hid_descriptor;
 mod keycodes;
 
 const NUM_COLS: usize = 14;
@@ -96,7 +97,7 @@ fn main() -> ! {
     let poll_ms = 8;
     let mut hid_endpoint = HIDClass::new_with_settings(
         &bus_allocator,
-        KeyboardReport::desc(),
+        hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
         poll_ms,
         HidClassSettings {
             subclass: HidSubClass::NoSubClass,
@@ -154,7 +155,8 @@ fn main() -> ! {
     let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS);
     let mut scan_countdown = timer.count_down();
 
-    scan_countdown.start(8.milliseconds());
+    // Start on a 500ms countdown so the USB endpoint writes don't block.
+    scan_countdown.start(500.milliseconds());
 
     info!("Start main loop");
 
@@ -167,7 +169,24 @@ fn main() -> ! {
             let matrix = scan_keys(rows, cols, &mut delay);
             let report = report_from_matrix(&matrix);
 
-            hid_endpoint.push_input(&report).ok();
+            match hid_endpoint.push_input(&report) {
+                Ok(_) => {
+                    scan_countdown.start(8.milliseconds());
+                },
+                Err(err) => match err {
+                    UsbError::WouldBlock => {
+                        info!("UsbError::WouldBlock");
+                        scan_countdown.start(100.milliseconds());
+                    },
+                    UsbError::ParseError => error!("UsbError::ParseError"),
+                    UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
+                    UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
+                    UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
+                    UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
+                    UsbError::Unsupported => error!("UsbError::Unsupported"),
+                    UsbError::InvalidState => error!("UsbError::InvalidState"),
+                },
+            }
         }
 
         hid_endpoint.pull_raw_output(&mut [0; 64]).ok();
