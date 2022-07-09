@@ -9,6 +9,8 @@ cargo install elf2uf2-rs
 
 ## Flash Code
 
+Hold the "USB Boot" button (near the QSPI chip), and either press the reset button or re-insert the USB cable to put the board in USB mass-storage bootloader mode.
+
 ```
 cargo run --release
 ```

@@ -6,13 +6,16 @@
 
 use core::convert::Infallible;
 use cortex_m::delay::Delay;
+use defmt::info;
+use defmt_rtt as _;
 use embedded_hal::{
     digital::v2::{InputPin, OutputPin},
     timer::CountDown,
 };
 use embedded_time::duration::Extensions;
 use keycodes::KeyCode;
-use panic_reset as _;
+// use panic_reset as _;
+use panic_probe as _;
 use rp2040_hal::{pac, usb::UsbBus, Clock, Watchdog};
 use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid};
 use usbd_hid::{
@@ -53,8 +56,14 @@ const MATRIX_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] = [
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
+#[defmt::panic_handler]
+fn panic() -> ! {
+    cortex_m::asm::udf()
+}
+
 #[cortex_m_rt::entry]
 fn main() -> ! {
+    info!("Start of main()");
     let mut pac = pac::Peripherals::take().unwrap();
     let core = pac::CorePeripherals::take().unwrap();
 
@@ -97,6 +106,8 @@ fn main() -> ! {
             locale: HidCountryCode::US,
         },
     );
+
+    info!("USB initialized");
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
     let mut keyboard_usb_device = UsbDeviceBuilder::new(&bus_allocator, UsbVidPid(0x16c0, 0x27db))
@@ -144,6 +155,8 @@ fn main() -> ! {
     let mut scan_countdown = timer.count_down();
 
     scan_countdown.start(8.milliseconds());
+
+    info!("Start main loop");
 
     // Main keyboard polling loop.
     loop {

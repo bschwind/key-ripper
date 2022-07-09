@@ -15,3 +15,12 @@ rp2040-boot2 = "0.2"
 rp2040-hal = "0.5"
 usb-device = "0.2"
 usbd-hid = "0.6"
+
+# Dependencies for debug probe
+defmt = "0.3" # Macros and support for deferred formatting logging
+defmt-rtt = "0.3" # Contains a definition for a #[global_logger]
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+# Needed to enable DWARF location info
+[profile.release]
+debug = 2
