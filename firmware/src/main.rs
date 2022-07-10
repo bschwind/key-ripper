@@ -94,6 +94,7 @@ fn main() -> ! {
 
     let bus_allocator = UsbBusAllocator::new(usb_bus);
 
+    // Note - Going lower than this requires switch debouncing.
     let poll_ms = 8;
     let mut hid_endpoint = HIDClass::new_with_settings(
         &bus_allocator,
@@ -174,10 +175,7 @@ fn main() -> ! {
                     scan_countdown.start(8.milliseconds());
                 },
                 Err(err) => match err {
-                    UsbError::WouldBlock => {
-                        info!("UsbError::WouldBlock");
-                        scan_countdown.start(100.milliseconds());
-                    },
+                    UsbError::WouldBlock => info!("UsbError::WouldBlock"),
                     UsbError::ParseError => error!("UsbError::ParseError"),
                     UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
                     UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
