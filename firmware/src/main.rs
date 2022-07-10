@@ -13,7 +13,6 @@ use embedded_hal::{
     timer::CountDown,
 };
 use embedded_time::duration::Extensions;
-use keycodes::KeyCode;
 // use panic_reset as _;
 use panic_probe as _;
 use rp2040_hal::{pac, usb::UsbBus, Clock, Watchdog};
@@ -32,28 +31,11 @@ use usbd_hid::{
 pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
 
 mod hid_descriptor;
-mod keycodes;
+mod key_codes;
+mod key_mapping;
 
 const NUM_COLS: usize = 14;
 const NUM_ROWS: usize = 6;
-
-#[rustfmt::skip]
-const MATRIX_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] = [
-    [KeyCode::Escape, KeyCode::Tilde, KeyCode::Tab, KeyCode::CapsLock, KeyCode::LeftShift, KeyCode::Fn],
-    [KeyCode::F1, KeyCode::Num1, KeyCode::Q, KeyCode::A, KeyCode::Empty, KeyCode::LeftCtrl],
-    [KeyCode::F2, KeyCode::Num2, KeyCode::W, KeyCode::S, KeyCode::Z, KeyCode::LeftAlt],
-    [KeyCode::F3, KeyCode::Num3, KeyCode::E, KeyCode::D, KeyCode::X, KeyCode::LeftCmd],
-    [KeyCode::F4, KeyCode::Num4, KeyCode::R, KeyCode::F, KeyCode::C, KeyCode::Empty],
-    [KeyCode::F5, KeyCode::Num5, KeyCode::T, KeyCode::G, KeyCode::V, KeyCode::Empty],
-    [KeyCode::Empty, KeyCode::Num6, KeyCode::Y, KeyCode::H, KeyCode::B, KeyCode::Space],
-    [KeyCode::F6, KeyCode::Num7, KeyCode::U, KeyCode::J, KeyCode::N, KeyCode::Empty],
-    [KeyCode::F7, KeyCode::Num8, KeyCode::I, KeyCode::K, KeyCode::M, KeyCode::Empty],
-    [KeyCode::F8, KeyCode::Num9, KeyCode::O, KeyCode::L, KeyCode::Comma, KeyCode::Empty],
-    [KeyCode::F9, KeyCode::Num0, KeyCode::P, KeyCode::Semicolon, KeyCode::Period, KeyCode::RightCmd],
-    [KeyCode::F10, KeyCode::Minus, KeyCode::LeftSquareBracket, KeyCode::SingleQuote, KeyCode::ForwardSlash, KeyCode::Left],
-    [KeyCode::F11, KeyCode::Equals, KeyCode::RightSquareBracket, KeyCode::Enter, KeyCode::Up, KeyCode::Down],
-    [KeyCode::F12, KeyCode::Backspace, KeyCode::BackSlash, KeyCode::Empty, KeyCode::Empty, KeyCode::Right],
-];
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
@@ -225,7 +207,13 @@ fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
         }
     };
 
-    for (matrix_column, mapping_column) in matrix.iter().zip(MATRIX_MAPPING) {
+    let layer_mapping = if matrix[0][5] {
+        key_mapping::FN_LAYER_MAPPING
+    } else {
+        key_mapping::NORMAL_LAYER_MAPPING
+    };
+
+    for (matrix_column, mapping_column) in matrix.iter().zip(layer_mapping) {
         for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
             if *key_pressed {
                 if let Some(bitmask) = mapping_row.modifier_bitmask() {

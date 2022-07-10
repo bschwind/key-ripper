@@ -2,7 +2,7 @@ use defmt::Format;
 
 #[allow(unused)]
 #[repr(u8)]
-#[derive(Format)]
+#[derive(Copy, Clone, Format)]
 pub enum KeyCode {
     Empty = 0x0,
     A = 0x04,
@@ -75,6 +75,11 @@ pub enum KeyCode {
     Left = 0x50,
     Down = 0x51,
     Up = 0x52,
+
+    // Media Keys
+    VolumeMute = 0x7F,
+    VolumeUp = 0x80,
+    VolumeDown = 0x81,
 
     // Modifier keys
     Fn = 0xF0,
