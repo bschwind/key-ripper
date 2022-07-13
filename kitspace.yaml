@@ -1,0 +1,3 @@
+gerbers: pcb/production/v0.1/gerber/
+bom: pcb/production/v0.1/bom.csv
+color: black
