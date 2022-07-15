@@ -2,6 +2,8 @@
 
 A keyboard personalized for myself, designed in KiCad, with custom firmware written in Rust.
 
+The story behind this board can be found in [this reddit post](https://www.reddit.com/r/MechanicalKeyboards/comments/vtlujd/i_built_a_keyboard_pcb_and_wrote_firmware_for_it/).
+
 ## Current Version (v0.1)
 
 ![PCB Front](https://i.imgur.com/pEsHZqL.jpeg)
