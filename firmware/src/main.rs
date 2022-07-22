@@ -6,7 +6,7 @@
 
 use core::convert::Infallible;
 use cortex_m::delay::Delay;
-use defmt::{error, info};
+use defmt::{error, info, warn};
 use defmt_rtt as _;
 use embedded_hal::{
     digital::v2::{InputPin, OutputPin},
@@ -157,7 +157,7 @@ fn main() -> ! {
                     scan_countdown.start(8.milliseconds());
                 },
                 Err(err) => match err {
-                    UsbError::WouldBlock => info!("UsbError::WouldBlock"),
+                    UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
                     UsbError::ParseError => error!("UsbError::ParseError"),
                     UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
                     UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),

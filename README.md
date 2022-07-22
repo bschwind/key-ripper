@@ -17,3 +17,7 @@ The story behind this board can be found in [this reddit post](https://www.reddi
 For every PCB fabrication order, I make a github release and upload the files I used to make the order.
 
 You can see a list of releases [here](https://github.com/bschwind/key-ripper/releases).
+
+## Debugging
+
+Set the `DEFMT_LOG` environment variable.
