@@ -143,6 +143,15 @@ fn main() -> ! {
 
     info!("Start main loop");
 
+    let matrix = scan_keys(rows, cols, &mut delay);
+
+    // If the Escape key is pressed during power-on, we should go into bootloader mode.
+    if matrix[0][0] {
+        let gpio_activity_pin_mask = 0;
+        let disable_interface_mask = 0;
+        rp2040_hal::rom_data::reset_to_usb_boot(gpio_activity_pin_mask, disable_interface_mask);
+    }
+
     // Main keyboard polling loop.
     loop {
         keyboard_usb_device.poll(&mut [&mut hid_endpoint]);
