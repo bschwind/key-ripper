@@ -4,7 +4,45 @@ A keyboard personalized for myself, designed in KiCad, with custom firmware writ
 
 The story behind this board can be found in [this reddit post](https://www.reddit.com/r/MechanicalKeyboards/comments/vtlujd/i_built_a_keyboard_pcb_and_wrote_firmware_for_it/).
 
-## Current Version (v0.1)
+## Main Features and Requirements
+
+* Be cheap to manufacture (can easily be ordered and fabricated by JLCPCB, uses an RP2040)
+* USB C Connector
+* Have dedicated function keys
+* Reduce friction changing between a macbook keyboard and this one
+* Stay relatively compact
+* Full sized arrow keys with a gap (on the left and right) for easily finding the up arrow without looking
+* No right shift key (this allows for the arrow keys to sit below the Enter key, and I never use right shift)
+* Support for screw-in stabilizers first and foremost, along with snap-in stabilizers, and plate-mounted stabilizers when using a top plate
+* Easy to assemble - this will apply once I design a case for it
+* Firmware written in Rust, debuggable with knurling-rs
+
+## Current Version (v0.2)
+
+[v0.2 JLCPCB Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.2)
+
+Version 0.2 improves upon some of the issues in v0.1, with some intentional choices that could be seen as a downgrade:
+
+* Added a copper pour on both sides for a flatter PCB
+* Shifted a few components away from the screw-in stabilizer holes to avoid screw washers touching the components
+* Fixed some silkscreens for the reset and USB boot buttons
+* Fixed the alignment of the F5 key
+* **Controversial** - Changed the switch footprint to normal MX soldered switches instead of Kailh hotswap footprints. This allows for simpler boards that don't require a top plate.
+
+(pictures to be added later)
+
+## Version v0.1
+
+Version 0.1 _works_ but there are some issues:
+
+* The PCB warps during SMT reflow because there is a copper pour on only one side
+* The silkscreens are not labeled well (SW1, SW2, SW3, etc. instead of Q, W, E, R, etc.)
+* The F5 key is slightly more to the left of the F6 key than it should be, which leads to incompatible top plates between v0.1 and v0.2
+
+Version 0.1 uses Kailh hotswap sockets. Combined with the top plate, this is good for trying out different switches, but adds complexity
+in the build process. It requires more parts, and I had to 3D print 3.4mm M2 spacers.
+
+[v0.1 JLCPCB Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.1)
 
 ![PCB Front](https://i.imgur.com/pEsHZqL.jpeg)
 ![PCB Back](https://i.imgur.com/iWDIUL9.jpeg)
