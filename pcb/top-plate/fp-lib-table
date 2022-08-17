@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "bschwind_slots")(type "KiCad")(uri "${KIPRJMOD}/../extra-parts/kicad-keyboard-parts/slots.pretty")(options "")(descr ""))
+)

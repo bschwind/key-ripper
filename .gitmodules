@@ -1,0 +1,3 @@
+[submodule "pcb/extra-parts/kicad-keyboard-parts"]
+	path = pcb/extra-parts/kicad-keyboard-parts
+	url = https://github.com/bschwind/kicad-keyboard-parts.git
