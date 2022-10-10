@@ -14,7 +14,8 @@ panic-reset = "0.1"
 rp2040-boot2 = "0.2"
 rp2040-hal = "0.5"
 usb-device = "0.2"
-usbd-hid = "0.6"
+# usbd-hid = "0.6"
+usbd-human-interface-device = "0.3"
 
 # Dependencies for debug probe
 defmt = "0.3" # Macros and support for deferred formatting logging
