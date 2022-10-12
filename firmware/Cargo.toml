@@ -13,9 +13,13 @@ embedded-time = "0.12"
 fugit = "0.3"
 panic-reset = "0.1"
 rp2040-boot2 = "0.2"
-rp2040-hal = "0.6"
+rp2040-hal = { version = "0.6", features = ["rt"] }
 usb-device = "0.2"
 usbd-hid = "0.6"
+# Always set the custom-impl feature of legacy critical-section, even if we don't provide our own,
+# as the default implementation should no longer be used.
+critical-section_0_2 = { package = "critical-section", version = "0.2.4", features = ["custom-impl"] }
+critical-section = { version = "1.0.0" }
 
 # Dependencies for debug probe
 defmt = "0.3" # Macros and support for deferred formatting logging

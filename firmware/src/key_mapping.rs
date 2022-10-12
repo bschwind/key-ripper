@@ -2,10 +2,10 @@ use crate::{key_codes::KeyCode, NUM_COLS, NUM_ROWS};
 
 #[rustfmt::skip]
 pub const NORMAL_LAYER_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] = [
-    [KeyCode::Escape, KeyCode::Tilde, KeyCode::Tab, KeyCode::CapsLock, KeyCode::LeftShift, KeyCode::Fn],
+    [KeyCode::Fn, KeyCode::Tilde, KeyCode::Tab, KeyCode::Escape, KeyCode::LeftShift, KeyCode::LeftCtrl],
     [KeyCode::F1, KeyCode::Num1, KeyCode::Q, KeyCode::A, KeyCode::Empty, KeyCode::LeftCtrl],
-    [KeyCode::F2, KeyCode::Num2, KeyCode::W, KeyCode::S, KeyCode::Z, KeyCode::LeftAlt],
-    [KeyCode::F3, KeyCode::Num3, KeyCode::E, KeyCode::D, KeyCode::X, KeyCode::LeftCmd],
+    [KeyCode::F2, KeyCode::Num2, KeyCode::W, KeyCode::S, KeyCode::Z, KeyCode::LeftCmd],
+    [KeyCode::F3, KeyCode::Num3, KeyCode::E, KeyCode::D, KeyCode::X, KeyCode::LeftAlt],
     [KeyCode::F4, KeyCode::Num4, KeyCode::R, KeyCode::F, KeyCode::C, KeyCode::Empty],
     [KeyCode::F5, KeyCode::Num5, KeyCode::T, KeyCode::G, KeyCode::V, KeyCode::Empty],
     [KeyCode::Empty, KeyCode::Num6, KeyCode::Y, KeyCode::H, KeyCode::B, KeyCode::Space],
@@ -20,10 +20,10 @@ pub const NORMAL_LAYER_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] = [
 
 #[rustfmt::skip]
 pub const FN_LAYER_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] = [
-    [KeyCode::Escape, KeyCode::Tilde, KeyCode::Tab, KeyCode::CapsLock, KeyCode::LeftShift, KeyCode::Empty],
+    [KeyCode::Empty, KeyCode::Tilde, KeyCode::Tab, KeyCode::CapsLock, KeyCode::LeftShift, KeyCode::LeftCtrl],
     [KeyCode::F1, KeyCode::Num1, KeyCode::Q, KeyCode::A, KeyCode::Empty, KeyCode::LeftCtrl],
-    [KeyCode::F2, KeyCode::Num2, KeyCode::W, KeyCode::S, KeyCode::Z, KeyCode::LeftAlt],
-    [KeyCode::F3, KeyCode::Num3, KeyCode::E, KeyCode::D, KeyCode::X, KeyCode::LeftCmd],
+    [KeyCode::F2, KeyCode::Num2, KeyCode::W, KeyCode::S, KeyCode::Z, KeyCode::LeftCmd],
+    [KeyCode::F3, KeyCode::Num3, KeyCode::E, KeyCode::D, KeyCode::X, KeyCode::LeftAlt],
     [KeyCode::F4, KeyCode::Num4, KeyCode::R, KeyCode::F, KeyCode::C, KeyCode::Empty],
     [KeyCode::F5, KeyCode::Num5, KeyCode::T, KeyCode::G, KeyCode::V, KeyCode::Empty],
     [KeyCode::Empty, KeyCode::Num6, KeyCode::Y, KeyCode::H, KeyCode::B, KeyCode::Space],

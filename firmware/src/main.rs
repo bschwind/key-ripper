@@ -5,7 +5,7 @@
 #![no_std]
 
 use core::convert::Infallible;
-use cortex_m::delay::Delay;
+use cortex_m::{delay::Delay};
 use defmt::{error, info, warn};
 use defmt_rtt as _;
 use fugit::MicrosDurationU32;
@@ -15,7 +15,7 @@ use embedded_hal::{
 };
 // use panic_reset as _;
 use panic_probe as _;
-use rp2040_hal::{pac, usb::UsbBus, Clock, Watchdog};
+use rp2040_hal::{pac::{self, interrupt}, usb::{self, UsbBus}, Clock, Watchdog};
 use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid, UsbError};
 use usbd_hid::{
     descriptor::KeyboardReport,
@@ -23,6 +23,9 @@ use usbd_hid::{
         HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
     },
 };
+use usb_device::{class_prelude::*, prelude::*};
+use rp2040_hal::prelude::*;
+use usbd_hid::descriptor::generator_prelude::*;
 
 /// The linker will place this boot block at the start of our program image. We
 /// need this to help the ROM bootloader get our code up and running.
@@ -39,6 +42,18 @@ const NUM_ROWS: usize = 6;
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
+/// The USB Device Driver (shared with the interrupt).
+static mut USB_DEVICE: Option<UsbDevice<usb::UsbBus>> = None;
+
+/// The USB Bus Driver (shared with the interrupt).
+static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
+
+/// The USB Human Interface Device Driver (shared with the interrupt).
+static mut USB_HID: Option<HIDClass<usb::UsbBus>> = None;
+
+/// The latest keyboard report for responding to USB interrupts.
+static mut KEYBOARD_REPORT: Option<KeyboardReport> = None;
+
 #[defmt::panic_handler]
 fn panic() -> ! {
     cortex_m::asm::udf()
@@ -48,7 +63,7 @@ fn panic() -> ! {
 fn main() -> ! {
     info!("Start of main()");
     let mut pac = pac::Peripherals::take().unwrap();
-    let core = pac::CorePeripherals::take().unwrap();
+    let mut core = pac::CorePeripherals::take().unwrap();
 
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
 
@@ -75,11 +90,19 @@ fn main() -> ! {
     );
 
     let bus_allocator = UsbBusAllocator::new(usb_bus);
+    unsafe {
+        // Note (safety): This is safe as interrupts haven't been started yet
+        USB_BUS = Some(bus_allocator);
+    }
+    // Grab a reference to the USB Bus allocator. We are promising to the
+    // compiler not to take mutable access to this global variable whilst this
+    // reference exists!
+    let bus_ref = unsafe { USB_BUS.as_ref().unwrap() };
 
     // Note - Going lower than this requires switch debouncing.
     let poll_ms = 8;
     let mut hid_endpoint = HIDClass::new_with_settings(
-        &bus_allocator,
+        bus_ref,
         hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
         poll_ms,
         HidClassSettings {
@@ -90,14 +113,22 @@ fn main() -> ! {
             locale: HidCountryCode::US,
         },
     );
+    unsafe {
+        // Note (safety): This is safe as interrupts haven't been started yet.
+        USB_HID = Some(hid_endpoint);
+    }
 
     info!("USB initialized");
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
-    let mut keyboard_usb_device = UsbDeviceBuilder::new(&bus_allocator, UsbVidPid(0x16c0, 0x27db))
+    let mut keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
         .manufacturer("bschwind")
         .product("key ripper")
         .build();
+    unsafe {
+        // Note (safety): This is safe as interrupts haven't been started yet
+        USB_DEVICE = Some(keyboard_usb_device);
+    }
 
     // Get the GPIO peripherals.
     let sio = rp2040_hal::Sio::new(pac.SIO);
@@ -152,16 +183,22 @@ fn main() -> ! {
         rp2040_hal::rom_data::reset_to_usb_boot(gpio_activity_pin_mask, disable_interface_mask);
     }
 
+    info!("setting interrupt");
+    unsafe {
+        // core.NVIC.set_priority(pac::Interrupt::USBCTRL_IRQ, 1);
+        pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
+    }
+    info!("interrupt set.");
     // Main keyboard polling loop.
     loop {
-        keyboard_usb_device.poll(&mut [&mut hid_endpoint]);
+        // keyboard_usb_device.poll(&mut [&mut hid_endpoint]);
 
         if scan_countdown.wait().is_ok() {
             // Scan the keys and send a report.
             let matrix = scan_keys(rows, cols, &mut delay);
             let report = report_from_matrix(&matrix);
 
-            match hid_endpoint.push_input(&report) {
+            match push_mouse_movement(report) {
                 Ok(_) => {
                     scan_countdown.start(MicrosDurationU32::millis(8));
                 },
@@ -177,9 +214,19 @@ fn main() -> ! {
                 },
             }
         }
-
-        hid_endpoint.pull_raw_output(&mut [0; 64]).ok();
     }
+}
+
+fn push_mouse_movement(report: KeyboardReport) -> Result<usize, usb_device::UsbError> {
+    critical_section::with(|_| unsafe {
+        // Now interrupts are disabled, grab the global variable and, if
+        // available, send it a HID report
+        USB_HID.as_mut().map(|hid| {
+            hid.push_input(&report);
+            hid.pull_raw_output(&mut [0; 64])
+        })
+    })
+    .unwrap()
 }
 
 fn scan_keys(
@@ -235,4 +282,14 @@ fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
     }
 
     KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
+}
+
+#[allow(non_snake_case)]
+#[interrupt]
+unsafe fn USBCTRL_IRQ() {
+    info!("usb irq");
+    // Handle USB request
+    let usb_dev = USB_DEVICE.as_mut().unwrap();
+    let usb_hid = USB_HID.as_mut().unwrap();
+    usb_dev.poll(&mut [usb_hid]);
 }
