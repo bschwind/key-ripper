@@ -1,10 +1,9 @@
 //! A simple-as-possible key debouncer module to reduce undesired duplicate keypress
 //! reports.
 
-
 /// `Debounce` is a tick-based allocation-free "eager" (reports keypresses immediately)
 /// debouncer.
-/// 
+///
 /// # Algorithm
 /// Its main purpose is to prevent rapid double-keypress events (i.e. when a key is
 /// reported as not pressed, then immediately re-pressed). It does this by maintaining
