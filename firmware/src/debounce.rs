@@ -14,7 +14,10 @@
 /// Ticks are of arbitrary unit, with a configurable tick-count in which a repeat
 /// keypress is suppressed. It's up to the user to handle the tick-to-millisecond conversion.
 pub struct Debounce<const NUM_ROWS: usize, const NUM_COLS: usize> {
+    /// The state matrix of debounce countdowns per-key.
     countdown_matrix: [[u8; NUM_ROWS]; NUM_COLS],
+
+    /// The number of ticks to begin the debounce countdown from on a reported keypress.
     expiration_ticks: u8,
 }
 
