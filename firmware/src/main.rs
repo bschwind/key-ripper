@@ -138,6 +138,7 @@ fn main() -> ! {
         rp2040_hal::rom_data::reset_to_usb_boot(gpio_activity_pin_mask, disable_interface_mask);
     }
 
+    info!("Initializing USB");
     // Initialize USB
     let force_vbus_detect_bit = true;
     let usb_bus = UsbBus::new(
@@ -178,12 +179,10 @@ fn main() -> ! {
         USB_HID = Some(hid_endpoint);
         USB_DEVICE = Some(keyboard_usb_device);
     }
-    info!("Enabling USB interrupt");
+    info!("Enabling USB interrupt handler");
     unsafe {
         pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
     }
-    info!("USB initialized");
-
     info!("Entering main loop");
     loop {
         let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
