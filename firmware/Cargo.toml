@@ -22,7 +22,7 @@ critical-section = { version = "1.0.0" }
 
 # Dependencies for debug probe
 defmt = "0.3" # Macros and support for deferred formatting logging
-defmt-rtt = "0.3" # Contains a definition for a #[global_logger]
+defmt-rtt = "0.4" # Contains a definition for a #[global_logger]
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 
 # Needed to enable DWARF location info
