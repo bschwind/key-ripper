@@ -2,6 +2,10 @@ on: [push, pull_request]
 
 name: Cargo Format
 
+defaults:
+  run:
+    working-directory: firmware
+
 jobs:
   fmt:
     name: Cargo Format

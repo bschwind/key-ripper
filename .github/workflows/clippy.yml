@@ -2,6 +2,10 @@ on: [push, pull_request]
 
 name: Cargo Clippy
 
+defaults:
+  run:
+    working-directory: firmware
+
 jobs:
   clippy:
     name: Cargo Clippy
