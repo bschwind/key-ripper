@@ -1,21 +1,33 @@
-//! A tick-based allocation-free "eager" (reports keypresses immediately) debouncer.
-//! Ticks are of arbitrary unit, with a configurable tick-count in which a repeat
-//! keypress is suppressed.
-//!
-//! It's up to the user to handle the tick-to-millisecond conversion.
+//! A simple-as-possible key debouncer module to reduce undesired duplicate keypress
+//! reports.
 
+
+/// `Debounce` is a tick-based allocation-free "eager" (reports keypresses immediately)
+/// debouncer.
+/// 
+/// # Algorithm
+/// Its main purpose is to prevent rapid double-keypress events (i.e. when a key is
+/// reported as not pressed, then immediately re-pressed). It does this by maintaining
+/// an internal matrix of countdown ticks, where if a key is un-pressed and re-pressed
+/// within `expiration` ticks, `Debounce` will report it as one continuous keypress.
+///
+/// # Ticks
+/// Ticks are of arbitrary unit, with a configurable tick-count in which a repeat
+/// keypress is suppressed. It's up to the user to handle the tick-to-millisecond conversion.
 pub struct Debounce<const NUM_ROWS: usize, const NUM_COLS: usize> {
     matrix: [[u8; NUM_ROWS]; NUM_COLS],
     expiration: u8,
 }
 
-const DEFAULT_EXPIRATION: u8 = 6;
-
 impl<const NUM_ROWS: usize, const NUM_COLS: usize> Debounce<NUM_ROWS, NUM_COLS> {
-    fn with_expiration(expiration: u8) -> Self {
+    /// Create a `Debounce` with a custom expiration tick amount.
+    pub fn with_expiration(expiration: u8) -> Self {
         Self { matrix: [[0; NUM_ROWS]; NUM_COLS], expiration }
     }
 
+    /// Report a new raw key scan matrix, expected to be called at a periodic "tick rate"
+    /// corresponding to the same debouncing expiration tick amount specified in the
+    /// constructor.
     pub fn report_and_tick(
         &mut self,
         matrix: &[[bool; NUM_ROWS]; NUM_COLS],
@@ -40,11 +52,5 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Debounce<NUM_ROWS, NUM_COLS> 
 
         // matrix.clone()
         debounced_matrix
-    }
-}
-
-impl<const N: usize, const M: usize> Default for Debounce<N, M> {
-    fn default() -> Self {
-        Self::with_expiration(DEFAULT_EXPIRATION)
     }
 }

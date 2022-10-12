@@ -34,6 +34,9 @@ use debounce::Debounce;
 /// The rate of polling the device will report to the host.
 const POLL_MS: u8 = 1;
 
+/// The number of milliseconds to wait until a "key-off-then-key-on" in quick succession is allowed.
+const DEBOUNCE_MS: u8 = 6;
+
 /// The linker will place this boot block at the start of our program image. We
 /// need this to help the ROM bootloader get our code up and running.
 #[link_section = ".boot2"]
@@ -184,7 +187,7 @@ fn main() -> ! {
     }
     info!("interrupt set.");
     // Main keyboard polling loop.
-    let mut debouncer = Debounce::default();
+    let mut debouncer = Debounce::with_expiration(DEBOUNCE_MS);
     loop {
         let raw_matrix = scan_keys(rows, cols, &mut delay);
         let debounced_matrix = debouncer.report_and_tick(&raw_matrix);
