@@ -15,14 +15,15 @@
 /// Ticks are of arbitrary unit, with a configurable tick-count in which a repeat
 /// keypress is suppressed. It's up to the user to handle the tick-to-millisecond conversion.
 pub struct Debounce<const NUM_ROWS: usize, const NUM_COLS: usize> {
-    matrix: [[u8; NUM_ROWS]; NUM_COLS],
-    expiration: u8,
+    countdown_matrix: [[u8; NUM_ROWS]; NUM_COLS],
+    expiration_ticks: u8,
 }
 
 impl<const NUM_ROWS: usize, const NUM_COLS: usize> Debounce<NUM_ROWS, NUM_COLS> {
-    /// Create a `Debounce` with a custom expiration tick amount.
-    pub fn with_expiration(expiration: u8) -> Self {
-        Self { matrix: [[0; NUM_ROWS]; NUM_COLS], expiration }
+    /// Create a `Debounce` with a specified expiration tick amount.
+    /// See struct documentation for what a "tick" means in this Debouncer.
+    pub fn with_expiration(expiration_ticks: u8) -> Self {
+        Self { countdown_matrix: [[0; NUM_ROWS]; NUM_COLS], expiration_ticks }
     }
 
     /// Report a new raw key scan matrix, expected to be called at a periodic "tick rate"
@@ -36,21 +37,20 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Debounce<NUM_ROWS, NUM_COLS> 
         // Things got a bit hairy with iterators, writing this way for legibility.
         for col in 0..NUM_COLS {
             for row in 0..NUM_ROWS {
-                let expiration_key = &mut self.matrix[col][row];
-                let report_key = matrix[col][row];
-                *expiration_key = match (report_key, *expiration_key) {
+                let countdown_entry = &mut self.countdown_matrix[col][row];
+                let report_entry = matrix[col][row];
+                *countdown_entry = match (report_entry, *countdown_entry) {
                     // A new "true" keypress is recorded
-                    (true, _) => self.expiration,
+                    (true, _) => self.expiration_ticks,
                     // No keypress detected
-                    (false, 0) => *expiration_key,
+                    (false, 0) => *countdown_entry,
                     // Continue expiring all previous keypresses
-                    _ => *expiration_key - 1,
+                    _ => *countdown_entry - 1,
                 };
-                debounced_matrix[col][row] = *expiration_key != 0;
+                debounced_matrix[col][row] = *countdown_entry != 0;
             }
         }
 
-        // matrix.clone()
         debounced_matrix
     }
 }

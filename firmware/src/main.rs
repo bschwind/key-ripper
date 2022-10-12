@@ -12,7 +12,7 @@ mod key_mapping;
 use core::{cell::RefCell, convert::Infallible, ops::Deref};
 use cortex_m::delay::Delay;
 use critical_section::Mutex;
-use defmt::{debug, error, info, warn};
+use defmt::{info, trace};
 use defmt_rtt as _;
 use embedded_hal::digital::v2::{InputPin, OutputPin};
 // use panic_reset as _;
@@ -257,7 +257,7 @@ fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
         }
     }
 
-    debug!("keycodes: {:?}", keycodes);
+    trace!("keycodes: {:?}", keycodes);
     KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
 }
 
