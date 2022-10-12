@@ -10,7 +10,7 @@ mod key_codes;
 mod key_mapping;
 mod key_scan;
 
-use core::{cell::RefCell, convert::Infallible, ops::Deref};
+use core::{cell::RefCell, convert::Infallible};
 use critical_section::Mutex;
 use defmt::info;
 use defmt_rtt as _;
@@ -59,7 +59,13 @@ static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 static mut USB_HID: Option<HIDClass<usb::UsbBus>> = None;
 
 /// The latest keyboard report for responding to USB interrupts.
-static KEYBOARD_REPORT: Mutex<RefCell<Option<KeyboardReport>>> = Mutex::new(RefCell::new(None));
+static KEYBOARD_REPORT: Mutex<RefCell<KeyboardReport>> = Mutex::new(RefCell::new(KeyboardReport {
+    modifier: 0,
+    reserved: 0,
+    leds: 0,
+    keycodes: [0u8; 6],
+}));
+
 #[defmt::panic_handler]
 fn panic() -> ! {
     cortex_m::asm::udf()
@@ -127,7 +133,7 @@ fn main() -> ! {
     // Do an initial scan of the keys so that we immediately have something to report to the host when asked.
     let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
     critical_section::with(|cs| {
-        KEYBOARD_REPORT.replace(cs, Some(scan.into()));
+        KEYBOARD_REPORT.replace(cs, scan.into());
     });
 
     // If the Escape key is pressed during power-on, we should go into bootloader mode.
@@ -186,9 +192,8 @@ fn main() -> ! {
     info!("Entering main loop");
     loop {
         let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
-
         critical_section::with(|cs| {
-            KEYBOARD_REPORT.replace(cs, Some(scan.into()));
+            KEYBOARD_REPORT.replace(cs, scan.into());
         });
         delay.delay_ms(1);
     }
@@ -202,9 +207,8 @@ unsafe fn USBCTRL_IRQ() {
     let usb_hid = USB_HID.as_mut().unwrap();
     usb_dev.poll(&mut [usb_hid]);
     critical_section::with(|cs| {
+        // This is safe because the interrupt handler is not enabled until we
         let report = KEYBOARD_REPORT.borrow_ref(cs);
-        if let &Some(report) = report.deref() {
-            usb_hid.push_input(&report).ok();
-        }
+        usb_hid.push_input(&*report).ok();
     });
 }
