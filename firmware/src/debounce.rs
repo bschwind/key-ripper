@@ -31,21 +31,17 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Debounce<NUM_ROWS, NUM_COLS> 
     /// constructor.
     pub fn report_and_tick(
         &mut self,
-        matrix: &[[bool; NUM_ROWS]; NUM_COLS],
+        report_matrix: &[[bool; NUM_ROWS]; NUM_COLS],
     ) -> [[bool; NUM_ROWS]; NUM_COLS] {
         let mut debounced_matrix = [[false; NUM_ROWS]; NUM_COLS];
         // Things got a bit hairy with iterators, writing this way for legibility.
         for col in 0..NUM_COLS {
             for row in 0..NUM_ROWS {
                 let countdown_entry = &mut self.countdown_matrix[col][row];
-                let report_entry = matrix[col][row];
-                *countdown_entry = match (report_entry, *countdown_entry) {
-                    // A new "true" keypress is recorded
-                    (true, _) => self.expiration_ticks,
-                    // No keypress detected
-                    (false, 0) => *countdown_entry,
-                    // Continue expiring all previous keypresses
-                    _ => *countdown_entry - 1,
+                *countdown_entry = if report_matrix[col][row] {
+                    self.expiration_ticks
+                } else {
+                    countdown_entry.saturating_sub(1)
                 };
                 debounced_matrix[col][row] = *countdown_entry != 0;
             }
