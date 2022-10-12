@@ -12,7 +12,7 @@ mod key_scan;
 
 use core::{cell::RefCell, convert::Infallible};
 use critical_section::Mutex;
-use defmt::info;
+use defmt::{error, info, warn};
 use defmt_rtt as _;
 use embedded_hal::digital::v2::{InputPin, OutputPin};
 use panic_probe as _;
@@ -205,10 +205,21 @@ fn main() -> ! {
 unsafe fn USBCTRL_IRQ() {
     let usb_dev = USB_DEVICE.as_mut().unwrap();
     let usb_hid = USB_HID.as_mut().unwrap();
+
     usb_dev.poll(&mut [usb_hid]);
-    critical_section::with(|cs| {
-        // This is safe because the interrupt handler is not enabled until we
-        let report = KEYBOARD_REPORT.borrow_ref(cs);
-        usb_hid.push_input(&*report).ok();
-    });
+
+    let report = critical_section::with(|cs| KEYBOARD_REPORT.borrow_ref(cs).clone());
+    match usb_hid.push_input(&report) {
+        Err(err) => match err {
+            UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
+            UsbError::ParseError => error!("UsbError::ParseError"),
+            UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
+            UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
+            UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
+            UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
+            UsbError::Unsupported => error!("UsbError::Unsupported"),
+            UsbError::InvalidState => error!("UsbError::InvalidState"),
+        },
+        _ => {},
+    }
 }
