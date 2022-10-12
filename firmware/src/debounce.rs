@@ -11,8 +11,10 @@
 /// within `expiration` ticks, `Debounce` will report it as one continuous keypress.
 ///
 /// # Ticks
-/// Ticks are of arbitrary unit, with a configurable tick-count in which a repeat
-/// keypress is suppressed. It's up to the user to handle the tick-to-millisecond conversion.
+/// Ticks are unitless, and represent a configurable tick-count in which a repeat
+/// keypress is suppressed. For example, if `report_and_tick()` is called at an interval
+/// of 1ms with an expiration of 5 ticks, a key will not be reported as a re-press
+/// for 5ms.
 pub struct Debounce<const NUM_ROWS: usize, const NUM_COLS: usize> {
     /// The state matrix of debounce countdowns per-key.
     countdown_matrix: [[u8; NUM_ROWS]; NUM_COLS],
