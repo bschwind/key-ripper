@@ -2,10 +2,6 @@ on: [push, pull_request]
 
 name: Cargo Clippy
 
-defaults:
-  run:
-    working-directory: firmware
-
 jobs:
   clippy:
     name: Cargo Clippy
@@ -22,4 +18,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets -- -D warnings
+          args: --manifest-path firmware/Cargo.toml --all-targets -- -D warnings

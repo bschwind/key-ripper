@@ -2,10 +2,6 @@ on: [push, pull_request]
 
 name: Cargo Format
 
-defaults:
-  run:
-    working-directory: firmware
-
 jobs:
   fmt:
     name: Cargo Format
@@ -21,4 +17,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --all -- --check
+          args: --manifest-path firmware/Cargo.toml --all -- --check
