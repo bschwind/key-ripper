@@ -8,11 +8,11 @@ use core::convert::Infallible;
 use cortex_m::delay::Delay;
 use defmt::{error, info, warn};
 use defmt_rtt as _;
+use fugit::MicrosDurationU32;
 use embedded_hal::{
     digital::v2::{InputPin, OutputPin},
     timer::CountDown,
 };
-use embedded_time::duration::Extensions;
 // use panic_reset as _;
 use panic_probe as _;
 use rp2040_hal::{pac, usb::UsbBus, Clock, Watchdog};
@@ -133,13 +133,13 @@ fn main() -> ! {
     ];
 
     // Timer-based resources.
-    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().0);
+    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
     let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS);
     let mut scan_countdown = timer.count_down();
 
     // Start on a 500ms countdown so the USB endpoint writes don't block.
-    scan_countdown.start(500.milliseconds());
+    scan_countdown.start(MicrosDurationU32::millis(500));
 
     info!("Start main loop");
 
@@ -163,7 +163,7 @@ fn main() -> ! {
 
             match hid_endpoint.push_input(&report) {
                 Ok(_) => {
-                    scan_countdown.start(8.milliseconds());
+                    scan_countdown.start(MicrosDurationU32::millis(8));
                 },
                 Err(err) => match err {
                     UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
