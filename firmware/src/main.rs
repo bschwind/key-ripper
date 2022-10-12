@@ -15,18 +15,13 @@ use critical_section::Mutex;
 use defmt::{info, trace};
 use defmt_rtt as _;
 use embedded_hal::digital::v2::{InputPin, OutputPin};
-// use panic_reset as _;
 use panic_probe as _;
 use rp2040_hal::{
     pac::{self, interrupt},
     usb::{self, UsbBus},
     Clock, Watchdog,
 };
-use usb_device::{
-    bus::UsbBusAllocator,
-    device::UsbDeviceBuilder,
-    prelude::{UsbVidPid, *},
-};
+use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::*};
 use usbd_hid::{
     descriptor::KeyboardReport,
     hid_class::{
@@ -98,18 +93,15 @@ fn main() -> ! {
         force_vbus_detect_bit,
         &mut pac.RESETS,
     );
-
     let bus_allocator = UsbBusAllocator::new(usb_bus);
-    unsafe {
+    let bus_ref = unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
         USB_BUS = Some(bus_allocator);
-    }
-    // Grab a reference to the USB Bus allocator. We are promising to the
-    // compiler not to take mutable access to this global variable whilst this
-    // reference exists!
-    let bus_ref = unsafe { USB_BUS.as_ref().unwrap() };
+        // We are promising to the compiler not to take mutable access to this global
+        // variable while this reference exists!
+        USB_BUS.as_ref().unwrap()
+    };
 
-    // Note - Going lower than this requires switch debouncing.
     let hid_endpoint = HIDClass::new_with_settings(
         bus_ref,
         hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
@@ -118,16 +110,9 @@ fn main() -> ! {
             subclass: HidSubClass::NoSubClass,
             protocol: HidProtocol::Keyboard,
             config: ProtocolModeConfig::ForceReport,
-            // locale: HidCountryCode::NotSupported,
             locale: HidCountryCode::US,
         },
     );
-    unsafe {
-        // Note (safety): This is safe as interrupts haven't been started yet.
-        USB_HID = Some(hid_endpoint);
-    }
-
-    info!("USB initialized");
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
     let keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
@@ -136,8 +121,10 @@ fn main() -> ! {
         .build();
     unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
+        USB_HID = Some(hid_endpoint);
         USB_DEVICE = Some(keyboard_usb_device);
     }
+    info!("USB initialized");
 
     // Get the GPIO peripherals.
     let sio = rp2040_hal::Sio::new(pac.SIO);
@@ -175,24 +162,23 @@ fn main() -> ! {
     // Timer-based resources.
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
-    info!("Start main loop");
     let matrix = scan_keys(rows, cols, &mut delay);
 
     // If the Escape key is pressed during power-on, we should go into bootloader mode.
     if matrix[0][0] {
         let gpio_activity_pin_mask = 0;
         let disable_interface_mask = 0;
+        info!("Escape key detected on boot, going into bootloader mode.");
         rp2040_hal::rom_data::reset_to_usb_boot(gpio_activity_pin_mask, disable_interface_mask);
     }
 
-    info!("setting interrupt");
+    info!("Enabling USB interrupt.");
     unsafe {
-        // core.NVIC.set_priority(pac::Interrupt::USBCTRL_IRQ, 1);
         pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
     }
-    info!("interrupt set.");
-    // Main keyboard polling loop.
+
     let mut debouncer = Debounce::with_expiration(DEBOUNCE_MS);
+    info!("Entering main loop.");
     loop {
         let raw_matrix = scan_keys(rows, cols, &mut delay);
         let debounced_matrix = debouncer.report_and_tick(&raw_matrix);
@@ -261,22 +247,17 @@ fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
     KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
 }
 
+/// Handle USB interrupts, used by the host to "poll" the keyboard for new inputs.
 #[allow(non_snake_case)]
 #[interrupt]
 unsafe fn USBCTRL_IRQ() {
-    // Handle USB request
     let usb_dev = USB_DEVICE.as_mut().unwrap();
     let usb_hid = USB_HID.as_mut().unwrap();
     usb_dev.poll(&mut [usb_hid]);
     critical_section::with(|cs| {
-        // This code runs within a critical section.
-
-        // `cs` is a token that you can use to "prove" that to some API,
-        // for example to a `Mutex`:
         let report = KEYBOARD_REPORT.borrow_ref(cs);
         if let &Some(report) = report.deref() {
             usb_hid.push_input(&report).ok();
-            usb_hid.pull_raw_output(&mut [0; 64]).ok();
         }
     });
 }
