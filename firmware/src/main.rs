@@ -64,6 +64,82 @@ fn panic() -> ! {
     cortex_m::asm::udf()
 }
 
+#[derive(Clone, Copy)]
+struct KeyScan<const NUM_ROWS: usize, const NUM_COLS: usize> {
+    matrix: [[bool; NUM_ROWS]; NUM_COLS],
+}
+
+impl<const NUM_ROWS: usize, const NUM_COLS: usize> Deref for KeyScan<NUM_ROWS, NUM_COLS> {
+    type Target = [[bool; NUM_ROWS]; NUM_COLS];
+
+    fn deref(&self) -> &Self::Target {
+        &self.matrix
+    }
+}
+
+impl<const NUM_ROWS: usize, const NUM_COLS: usize> KeyScan<NUM_ROWS, NUM_COLS> {
+    pub fn scan(
+        rows: &[&dyn InputPin<Error = Infallible>],
+        columns: &mut [&mut dyn embedded_hal::digital::v2::OutputPin<Error = Infallible>],
+        delay: &mut Delay,
+        debounce: &mut Debounce<NUM_ROWS, NUM_COLS>,
+    ) -> Self {
+        let mut raw_matrix = [[false; NUM_ROWS]; NUM_COLS];
+
+        for (gpio_col, matrix_col) in columns.iter_mut().zip(raw_matrix.iter_mut()) {
+            gpio_col.set_high().unwrap();
+            delay.delay_us(10);
+
+            for (gpio_row, matrix_row) in rows.iter().zip(matrix_col.iter_mut()) {
+                *matrix_row = gpio_row.is_high().unwrap();
+            }
+
+            gpio_col.set_low().unwrap();
+            delay.delay_us(10);
+        }
+
+        let matrix = debounce.report_and_tick(&raw_matrix);
+        Self { matrix }
+    }
+}
+
+impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_COLS>>
+    for KeyboardReport
+{
+    fn from(scan: KeyScan<NUM_ROWS, NUM_COLS>) -> Self {
+        let mut keycodes = [0u8; 6];
+        let mut keycode_index = 0;
+        let mut modifier = 0;
+
+        let mut push_keycode = |key| {
+            if keycode_index < keycodes.len() {
+                keycodes[keycode_index] = key;
+                keycode_index += 1;
+            }
+        };
+
+        let layer_mapping = if scan.matrix[0][5] {
+            key_mapping::FN_LAYER_MAPPING
+        } else {
+            key_mapping::NORMAL_LAYER_MAPPING
+        };
+
+        for (matrix_column, mapping_column) in scan.matrix.iter().zip(layer_mapping) {
+            for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
+                if *key_pressed {
+                    if let Some(bitmask) = mapping_row.modifier_bitmask() {
+                        modifier |= bitmask;
+                    } else {
+                        push_keycode(mapping_row as u8);
+                    }
+                }
+            }
+        }
+
+        KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
+    }
+}
+
 #[cortex_m_rt::entry]
 fn main() -> ! {
     info!("Start of main()");
@@ -84,7 +160,60 @@ fn main() -> ! {
     .ok()
     .unwrap();
 
-    // Setup USB
+    // Get the GPIO peripherals.
+    let sio = rp2040_hal::Sio::new(pac.SIO);
+
+    let pins =
+        rp2040_hal::gpio::Pins::new(pac.IO_BANK0, pac.PADS_BANK0, sio.gpio_bank0, &mut pac.RESETS);
+
+    // Set up keyboard matrix pins.
+    let rows: &[&dyn InputPin<Error = Infallible>] = &[
+        &pins.gpio26.into_pull_down_input(),
+        &pins.gpio25.into_pull_down_input(),
+        &pins.gpio27.into_pull_down_input(),
+        &pins.gpio28.into_pull_down_input(),
+        &pins.gpio15.into_pull_down_input(),
+        &pins.gpio24.into_pull_down_input(),
+    ];
+
+    let cols: &mut [&mut dyn OutputPin<Error = Infallible>] = &mut [
+        &mut pins.gpio29.into_push_pull_output(),
+        &mut pins.gpio16.into_push_pull_output(),
+        &mut pins.gpio17.into_push_pull_output(),
+        &mut pins.gpio18.into_push_pull_output(),
+        &mut pins.gpio9.into_push_pull_output(),
+        &mut pins.gpio10.into_push_pull_output(),
+        &mut pins.gpio19.into_push_pull_output(),
+        &mut pins.gpio11.into_push_pull_output(),
+        &mut pins.gpio12.into_push_pull_output(),
+        &mut pins.gpio13.into_push_pull_output(),
+        &mut pins.gpio14.into_push_pull_output(),
+        &mut pins.gpio20.into_push_pull_output(),
+        &mut pins.gpio22.into_push_pull_output(),
+        &mut pins.gpio23.into_push_pull_output(),
+    ];
+
+    // Initialize a delay for accurate sleeping.
+    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
+
+    // Create a global debounce state to prevent unintended rapid key double-presses.
+    let mut debounce: Debounce<NUM_ROWS, NUM_COLS> = Debounce::with_expiration(DEBOUNCE_MS);
+
+    // Do an initial scan of the keys so that we immediately have something to report to the host when asked.
+    let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
+    critical_section::with(|cs| {
+        KEYBOARD_REPORT.replace(cs, Some(scan.into()));
+    });
+
+    // If the Escape key is pressed during power-on, we should go into bootloader mode.
+    if scan[0][0] {
+        let gpio_activity_pin_mask = 0;
+        let disable_interface_mask = 0;
+        info!("Escape key detected on boot, going into bootloader mode.");
+        rp2040_hal::rom_data::reset_to_usb_boot(gpio_activity_pin_mask, disable_interface_mask);
+    }
+
+    // Initialize USB
     let force_vbus_detect_bit = true;
     let usb_bus = UsbBus::new(
         pac.USBCTRL_REGS,
@@ -124,127 +253,21 @@ fn main() -> ! {
         USB_HID = Some(hid_endpoint);
         USB_DEVICE = Some(keyboard_usb_device);
     }
-    info!("USB initialized");
-
-    // Get the GPIO peripherals.
-    let sio = rp2040_hal::Sio::new(pac.SIO);
-
-    let pins =
-        rp2040_hal::gpio::Pins::new(pac.IO_BANK0, pac.PADS_BANK0, sio.gpio_bank0, &mut pac.RESETS);
-
-    // Set up keyboard matrix pins.
-    let rows: &[&dyn InputPin<Error = Infallible>] = &[
-        &pins.gpio26.into_pull_down_input(),
-        &pins.gpio25.into_pull_down_input(),
-        &pins.gpio27.into_pull_down_input(),
-        &pins.gpio28.into_pull_down_input(),
-        &pins.gpio15.into_pull_down_input(),
-        &pins.gpio24.into_pull_down_input(),
-    ];
-
-    let cols: &mut [&mut dyn OutputPin<Error = Infallible>] = &mut [
-        &mut pins.gpio29.into_push_pull_output(),
-        &mut pins.gpio16.into_push_pull_output(),
-        &mut pins.gpio17.into_push_pull_output(),
-        &mut pins.gpio18.into_push_pull_output(),
-        &mut pins.gpio9.into_push_pull_output(),
-        &mut pins.gpio10.into_push_pull_output(),
-        &mut pins.gpio19.into_push_pull_output(),
-        &mut pins.gpio11.into_push_pull_output(),
-        &mut pins.gpio12.into_push_pull_output(),
-        &mut pins.gpio13.into_push_pull_output(),
-        &mut pins.gpio14.into_push_pull_output(),
-        &mut pins.gpio20.into_push_pull_output(),
-        &mut pins.gpio22.into_push_pull_output(),
-        &mut pins.gpio23.into_push_pull_output(),
-    ];
-
-    // Timer-based resources.
-    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
-
-    let matrix = scan_keys(rows, cols, &mut delay);
-
-    // If the Escape key is pressed during power-on, we should go into bootloader mode.
-    if matrix[0][0] {
-        let gpio_activity_pin_mask = 0;
-        let disable_interface_mask = 0;
-        info!("Escape key detected on boot, going into bootloader mode.");
-        rp2040_hal::rom_data::reset_to_usb_boot(gpio_activity_pin_mask, disable_interface_mask);
-    }
-
-    info!("Enabling USB interrupt.");
+    info!("Enabling USB interrupt");
     unsafe {
         pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
     }
+    info!("USB initialized");
 
-    let mut debouncer = Debounce::with_expiration(DEBOUNCE_MS);
-    info!("Entering main loop.");
+    info!("Entering main loop");
     loop {
-        let raw_matrix = scan_keys(rows, cols, &mut delay);
-        let debounced_matrix = debouncer.report_and_tick(&raw_matrix);
-        let report = report_from_matrix(&debounced_matrix);
+        let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
 
         critical_section::with(|cs| {
-            KEYBOARD_REPORT.replace(cs, Some(report));
+            KEYBOARD_REPORT.replace(cs, Some(scan.into()));
         });
         delay.delay_ms(1);
     }
-}
-
-fn scan_keys(
-    rows: &[&dyn InputPin<Error = Infallible>],
-    columns: &mut [&mut dyn embedded_hal::digital::v2::OutputPin<Error = Infallible>],
-    delay: &mut Delay,
-) -> [[bool; NUM_ROWS]; NUM_COLS] {
-    let mut matrix = [[false; NUM_ROWS]; NUM_COLS];
-
-    for (gpio_col, matrix_col) in columns.iter_mut().zip(matrix.iter_mut()) {
-        gpio_col.set_high().unwrap();
-        delay.delay_us(10);
-
-        for (gpio_row, matrix_row) in rows.iter().zip(matrix_col.iter_mut()) {
-            *matrix_row = gpio_row.is_high().unwrap();
-        }
-
-        gpio_col.set_low().unwrap();
-        delay.delay_us(10);
-    }
-
-    matrix
-}
-
-fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
-    let mut keycodes = [0u8; 6];
-    let mut keycode_index = 0;
-    let mut modifier = 0;
-
-    let mut push_keycode = |key| {
-        if keycode_index < keycodes.len() {
-            keycodes[keycode_index] = key;
-            keycode_index += 1;
-        }
-    };
-
-    let layer_mapping = if matrix[0][5] {
-        key_mapping::FN_LAYER_MAPPING
-    } else {
-        key_mapping::NORMAL_LAYER_MAPPING
-    };
-
-    for (matrix_column, mapping_column) in matrix.iter().zip(layer_mapping) {
-        for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
-            if *key_pressed {
-                if let Some(bitmask) = mapping_row.modifier_bitmask() {
-                    modifier |= bitmask;
-                } else {
-                    push_keycode(mapping_row as u8);
-                }
-            }
-        }
-    }
-
-    trace!("keycodes: {:?}", keycodes);
-    KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
 }
 
 /// Handle USB interrupts, used by the host to "poll" the keyboard for new inputs.
