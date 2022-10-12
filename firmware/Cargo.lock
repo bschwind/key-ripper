@@ -242,7 +242,6 @@ dependencies = [
  "defmt-rtt",
  "embedded-hal",
  "embedded-time",
- "fugit",
  "panic-probe",
  "panic-reset",
  "rp2040-boot2",

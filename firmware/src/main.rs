@@ -9,10 +9,8 @@ use cortex_m::{delay::Delay};
 use critical_section::{Mutex};
 use defmt::{error, info, warn};
 use defmt_rtt as _;
-use fugit::MicrosDurationU32;
 use embedded_hal::{
     digital::v2::{InputPin, OutputPin},
-    timer::CountDown,
 };
 // use panic_reset as _;
 use panic_probe as _;
@@ -164,14 +162,7 @@ fn main() -> ! {
     // Timer-based resources.
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
-    let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS);
-    let mut scan_countdown = timer.count_down();
-
-    // Start on a 500ms countdown so the USB endpoint writes don't block.
-    scan_countdown.start(MicrosDurationU32::millis(500));
-
     info!("Start main loop");
-
     let matrix = scan_keys(rows, cols, &mut delay);
 
     // If the Escape key is pressed during power-on, we should go into bootloader mode.
