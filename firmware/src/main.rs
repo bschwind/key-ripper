@@ -4,10 +4,15 @@
 #![no_main]
 #![no_std]
 
+mod debounce;
+mod hid_descriptor;
+mod key_codes;
+mod key_mapping;
+
 use core::{convert::Infallible, cell::RefCell, ops::Deref};
 use cortex_m::{delay::Delay};
 use critical_section::{Mutex};
-use defmt::{error, info, warn};
+use defmt::{debug, error, info, warn};
 use defmt_rtt as _;
 use embedded_hal::{
     digital::v2::{InputPin, OutputPin},
@@ -24,15 +29,16 @@ use usbd_hid::{
 };
 use usb_device::prelude::*;
 
+use debounce::Debounce;
+
+/// The rate of polling the device will report to the host.
+const POLL_MS: u8 = 1;
+
 /// The linker will place this boot block at the start of our program image. We
 /// need this to help the ROM bootloader get our code up and running.
 #[link_section = ".boot2"]
 #[used]
 pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
-
-mod hid_descriptor;
-mod key_codes;
-mod key_mapping;
 
 const NUM_COLS: usize = 14;
 const NUM_ROWS: usize = 6;
@@ -96,11 +102,10 @@ fn main() -> ! {
     let bus_ref = unsafe { USB_BUS.as_ref().unwrap() };
 
     // Note - Going lower than this requires switch debouncing.
-    let poll_ms = 8;
     let hid_endpoint = HIDClass::new_with_settings(
         bus_ref,
         hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
-        poll_ms,
+        POLL_MS,
         HidClassSettings {
             subclass: HidSubClass::NoSubClass,
             protocol: HidProtocol::Keyboard,
@@ -179,13 +184,16 @@ fn main() -> ! {
     }
     info!("interrupt set.");
     // Main keyboard polling loop.
+    let mut debouncer = Debounce::default();
     loop {
-        let matrix = scan_keys(rows, cols, &mut delay);
-        let report = report_from_matrix(&matrix);
+        let raw_matrix = scan_keys(rows, cols, &mut delay);
+        let debounced_matrix = debouncer.report_and_tick(&raw_matrix);
+        let report = report_from_matrix(&debounced_matrix);
 
         critical_section::with(|cs| {
             KEYBOARD_REPORT.replace(cs, Some(report));
         });
+        delay.delay_ms(1);
     }
 }
 
@@ -241,13 +249,13 @@ fn report_from_matrix(matrix: &[[bool; NUM_ROWS]; NUM_COLS]) -> KeyboardReport {
         }
     }
 
+    debug!("keycodes: {:?}", keycodes);
     KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
 }
 
 #[allow(non_snake_case)]
 #[interrupt]
 unsafe fn USBCTRL_IRQ() {
-    info!("usb irq");
     // Handle USB request
     let usb_dev = USB_DEVICE.as_mut().unwrap();
     let usb_hid = USB_HID.as_mut().unwrap();
@@ -259,7 +267,6 @@ unsafe fn USBCTRL_IRQ() {
         // for example to a `Mutex`:
         let report = KEYBOARD_REPORT.borrow_ref(cs);
         if let &Some(report) = report.deref() {
-            info!("pushing report back");
             usb_hid.push_input(&report).ok();
             usb_hid.pull_raw_output(&mut [0; 64]).ok();
         }
