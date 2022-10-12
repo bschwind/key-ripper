@@ -4,8 +4,9 @@
 #![no_main]
 #![no_std]
 
-use core::convert::Infallible;
+use core::{convert::Infallible, cell::RefCell, ops::Deref};
 use cortex_m::{delay::Delay};
+use critical_section::{Mutex, CriticalSection};
 use defmt::{error, info, warn};
 use defmt_rtt as _;
 use fugit::MicrosDurationU32;
@@ -52,8 +53,7 @@ static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 static mut USB_HID: Option<HIDClass<usb::UsbBus>> = None;
 
 /// The latest keyboard report for responding to USB interrupts.
-static mut KEYBOARD_REPORT: Option<KeyboardReport> = None;
-
+static KEYBOARD_REPORT: Mutex<RefCell<Option<KeyboardReport>>> = Mutex::new(RefCell::new(None));
 #[defmt::panic_handler]
 fn panic() -> ! {
     cortex_m::asm::udf()
@@ -191,29 +191,12 @@ fn main() -> ! {
     info!("interrupt set.");
     // Main keyboard polling loop.
     loop {
-        // keyboard_usb_device.poll(&mut [&mut hid_endpoint]);
+        let matrix = scan_keys(rows, cols, &mut delay);
+        let report = report_from_matrix(&matrix);
 
-        if scan_countdown.wait().is_ok() {
-            // Scan the keys and send a report.
-            let matrix = scan_keys(rows, cols, &mut delay);
-            let report = report_from_matrix(&matrix);
-
-            match push_mouse_movement(report) {
-                Ok(_) => {
-                    scan_countdown.start(MicrosDurationU32::millis(8));
-                },
-                Err(err) => match err {
-                    UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
-                    UsbError::ParseError => error!("UsbError::ParseError"),
-                    UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
-                    UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
-                    UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
-                    UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
-                    UsbError::Unsupported => error!("UsbError::Unsupported"),
-                    UsbError::InvalidState => error!("UsbError::InvalidState"),
-                },
-            }
-        }
+        critical_section::with(|cs| {
+            KEYBOARD_REPORT.replace(cs, Some(report));
+        });
     }
 }
 
@@ -292,4 +275,16 @@ unsafe fn USBCTRL_IRQ() {
     let usb_dev = USB_DEVICE.as_mut().unwrap();
     let usb_hid = USB_HID.as_mut().unwrap();
     usb_dev.poll(&mut [usb_hid]);
+    critical_section::with(|cs| {
+        // This code runs within a critical section.
+
+        // `cs` is a token that you can use to "prove" that to some API,
+        // for example to a `Mutex`:
+        let report = KEYBOARD_REPORT.borrow_ref(cs);
+        if let &Some(report) = report.deref() {
+            info!("pushing report back");
+            usb_hid.push_input(&report).ok();
+            usb_hid.pull_raw_output(&mut [0; 64]).ok();
+        }
+    });
 }
