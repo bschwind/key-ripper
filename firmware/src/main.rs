@@ -9,25 +9,30 @@ mod hid_descriptor;
 mod key_codes;
 mod key_mapping;
 
-use core::{convert::Infallible, cell::RefCell, ops::Deref};
-use cortex_m::{delay::Delay};
-use critical_section::{Mutex};
+use core::{cell::RefCell, convert::Infallible, ops::Deref};
+use cortex_m::delay::Delay;
+use critical_section::Mutex;
 use defmt::{debug, error, info, warn};
 use defmt_rtt as _;
-use embedded_hal::{
-    digital::v2::{InputPin, OutputPin},
-};
+use embedded_hal::digital::v2::{InputPin, OutputPin};
 // use panic_reset as _;
 use panic_probe as _;
-use rp2040_hal::{pac::{self, interrupt}, usb::{self, UsbBus}, Clock, Watchdog};
-use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid};
+use rp2040_hal::{
+    pac::{self, interrupt},
+    usb::{self, UsbBus},
+    Clock, Watchdog,
+};
+use usb_device::{
+    bus::UsbBusAllocator,
+    device::UsbDeviceBuilder,
+    prelude::{UsbVidPid, *},
+};
 use usbd_hid::{
     descriptor::KeyboardReport,
     hid_class::{
         HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
     },
 };
-use usb_device::prelude::*;
 
 use debounce::Debounce;
 
