@@ -6,7 +6,7 @@
 
 use core::{convert::Infallible, cell::RefCell, ops::Deref};
 use cortex_m::{delay::Delay};
-use critical_section::{Mutex, CriticalSection};
+use critical_section::{Mutex};
 use defmt::{error, info, warn};
 use defmt_rtt as _;
 use fugit::MicrosDurationU32;
@@ -17,16 +17,14 @@ use embedded_hal::{
 // use panic_reset as _;
 use panic_probe as _;
 use rp2040_hal::{pac::{self, interrupt}, usb::{self, UsbBus}, Clock, Watchdog};
-use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid, UsbError};
+use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::UsbVidPid};
 use usbd_hid::{
     descriptor::KeyboardReport,
     hid_class::{
         HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
     },
 };
-use usb_device::{class_prelude::*, prelude::*};
-use rp2040_hal::prelude::*;
-use usbd_hid::descriptor::generator_prelude::*;
+use usb_device::prelude::*;
 
 /// The linker will place this boot block at the start of our program image. We
 /// need this to help the ROM bootloader get our code up and running.
@@ -63,7 +61,7 @@ fn panic() -> ! {
 fn main() -> ! {
     info!("Start of main()");
     let mut pac = pac::Peripherals::take().unwrap();
-    let mut core = pac::CorePeripherals::take().unwrap();
+    let core = pac::CorePeripherals::take().unwrap();
 
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
 
@@ -101,7 +99,7 @@ fn main() -> ! {
 
     // Note - Going lower than this requires switch debouncing.
     let poll_ms = 8;
-    let mut hid_endpoint = HIDClass::new_with_settings(
+    let hid_endpoint = HIDClass::new_with_settings(
         bus_ref,
         hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
         poll_ms,
@@ -121,7 +119,7 @@ fn main() -> ! {
     info!("USB initialized");
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
-    let mut keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
+    let keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
         .manufacturer("bschwind")
         .product("key ripper")
         .build();
@@ -198,18 +196,6 @@ fn main() -> ! {
             KEYBOARD_REPORT.replace(cs, Some(report));
         });
     }
-}
-
-fn push_mouse_movement(report: KeyboardReport) -> Result<usize, usb_device::UsbError> {
-    critical_section::with(|_| unsafe {
-        // Now interrupts are disabled, grab the global variable and, if
-        // available, send it a HID report
-        USB_HID.as_mut().map(|hid| {
-            hid.push_input(&report);
-            hid.pull_raw_output(&mut [0; 64])
-        })
-    })
-    .unwrap()
 }
 
 fn scan_keys(
