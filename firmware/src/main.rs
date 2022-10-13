@@ -222,4 +222,5 @@ unsafe fn USBCTRL_IRQ() {
         },
         _ => {},
     }
+    usb_hid.pull_raw_output(&mut [0; 64]).ok();
 }
