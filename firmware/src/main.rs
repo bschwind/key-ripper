@@ -212,8 +212,8 @@ unsafe fn USBCTRL_IRQ() {
     usb_dev.poll(&mut [usb_hid]);
 
     let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
-    match usb_hid.push_input(&report) {
-        Err(err) => match err {
+    if let Err(err) = usb_hid.push_input(&report) {
+        match err {
             UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
             UsbError::ParseError => error!("UsbError::ParseError"),
             UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
@@ -222,8 +222,7 @@ unsafe fn USBCTRL_IRQ() {
             UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
             UsbError::Unsupported => error!("UsbError::Unsupported"),
             UsbError::InvalidState => error!("UsbError::InvalidState"),
-        },
-        _ => {},
+        }
     }
 
     // macOS doesn't like it when you don't pull this, apparently.
