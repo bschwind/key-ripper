@@ -107,4 +107,8 @@ impl KeyCode {
             _ => None,
         }
     }
+
+    pub fn is_modifier(&self) -> bool {
+        self.modifier_bitmask().is_some()
+    }
 }

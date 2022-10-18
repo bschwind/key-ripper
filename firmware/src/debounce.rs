@@ -19,6 +19,9 @@ pub struct Debounce<const NUM_ROWS: usize, const NUM_COLS: usize> {
     /// The state matrix of debounce countdowns per-key.
     countdown_matrix: [[u8; NUM_ROWS]; NUM_COLS],
 
+    /// The keys that are not to be debounced, typically the set of modifier keys.
+    passthrough_mask: [[bool; NUM_ROWS]; NUM_COLS],
+
     /// The number of ticks to begin the debounce countdown from on a reported keypress.
     expiration_ticks: u8,
 }
@@ -26,8 +29,8 @@ pub struct Debounce<const NUM_ROWS: usize, const NUM_COLS: usize> {
 impl<const NUM_ROWS: usize, const NUM_COLS: usize> Debounce<NUM_ROWS, NUM_COLS> {
     /// Create a `Debounce` with a specified expiration tick amount.
     /// See struct documentation for what a "tick" means in this Debouncer.
-    pub fn with_expiration(expiration_ticks: u8) -> Self {
-        Self { countdown_matrix: [[0; NUM_ROWS]; NUM_COLS], expiration_ticks }
+    pub fn new(expiration_ticks: u8, passthrough_mask: [[bool; NUM_ROWS]; NUM_COLS]) -> Self {
+        Self { countdown_matrix: [[0; NUM_ROWS]; NUM_COLS], passthrough_mask, expiration_ticks }
     }
 
     /// Report a new raw key scan matrix, expected to be called at a periodic "tick rate"
@@ -41,13 +44,17 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Debounce<NUM_ROWS, NUM_COLS> 
         // Things got a bit hairy with iterators, writing this way for legibility.
         for col in 0..NUM_COLS {
             for row in 0..NUM_ROWS {
-                let countdown_entry = &mut self.countdown_matrix[col][row];
-                *countdown_entry = if report_matrix[col][row] {
-                    self.expiration_ticks
+                if self.passthrough_mask[col][row] {
+                    debounced_matrix[col][row] = report_matrix[col][row];
                 } else {
-                    countdown_entry.saturating_sub(1)
-                };
-                debounced_matrix[col][row] = *countdown_entry != 0;
+                    let countdown_entry = &mut self.countdown_matrix[col][row];
+                    *countdown_entry = if report_matrix[col][row] {
+                        self.expiration_ticks
+                    } else {
+                        countdown_entry.saturating_sub(1)
+                    };
+                    debounced_matrix[col][row] = *countdown_entry != 0;
+                }
             }
         }
 

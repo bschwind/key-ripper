@@ -130,8 +130,15 @@ fn main() -> ! {
     // Initialize a delay for accurate sleeping.
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
+    let mut modifier_mask = [[false; NUM_ROWS]; NUM_COLS];
+    for (col, mapping_col) in modifier_mask.iter_mut().zip(key_mapping::NORMAL_LAYER_MAPPING) {
+        for (key, mapping_key) in col.iter_mut().zip(mapping_col) {
+            *key = mapping_key.is_modifier();
+        }
+    }
+
     // Create a global debounce state to prevent unintended rapid key double-presses.
-    let mut debounce: Debounce<NUM_ROWS, NUM_COLS> = Debounce::with_expiration(DEBOUNCE_TICKS);
+    let mut debounce: Debounce<NUM_ROWS, NUM_COLS> = Debounce::new(DEBOUNCE_TICKS, modifier_mask);
 
     // Do an initial scan of the keys so that we immediately have something to report to the host when asked.
     let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
