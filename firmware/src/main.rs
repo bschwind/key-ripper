@@ -32,11 +32,14 @@ use usbd_hid::{
 use debounce::Debounce;
 use key_scan::KeyScan;
 
-/// The rate of polling the device will report to the host.
-const POLL_MS: u8 = 1;
-
+/// The rate of polling of the keyboard itself in firmware.
+const SCAN_LOOP_RATE_MS: u32 = 1;
+/// The rate of USB interrupt polling the device will ask of the host.
+const USB_POLL_RATE_MS: u8 = SCAN_LOOP_RATE_MS as u8;
 /// The number of milliseconds to wait until a "key-off-then-key-on" in quick succession is allowed.
 const DEBOUNCE_MS: u8 = 6;
+
+const DEBOUNCE_TICKS: u8 = DEBOUNCE_MS / (SCAN_LOOP_RATE_MS as u8);
 
 /// The linker will place this boot block at the start of our program image. We
 /// need this to help the ROM bootloader get our code up and running.
@@ -128,7 +131,7 @@ fn main() -> ! {
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
     // Create a global debounce state to prevent unintended rapid key double-presses.
-    let mut debounce: Debounce<NUM_ROWS, NUM_COLS> = Debounce::with_expiration(DEBOUNCE_MS);
+    let mut debounce: Debounce<NUM_ROWS, NUM_COLS> = Debounce::with_expiration(DEBOUNCE_TICKS);
 
     // Do an initial scan of the keys so that we immediately have something to report to the host when asked.
     let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
@@ -166,7 +169,7 @@ fn main() -> ! {
     let hid_endpoint = HIDClass::new_with_settings(
         bus_ref,
         hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
-        POLL_MS,
+        USB_POLL_RATE_MS,
         HidClassSettings {
             subclass: HidSubClass::NoSubClass,
             protocol: HidProtocol::Keyboard,
@@ -195,7 +198,7 @@ fn main() -> ! {
         critical_section::with(|cs| {
             KEYBOARD_REPORT.replace(cs, scan.into());
         });
-        delay.delay_ms(1);
+        delay.delay_ms(SCAN_LOOP_RATE_MS);
     }
 }
 
@@ -208,7 +211,7 @@ unsafe fn USBCTRL_IRQ() {
 
     usb_dev.poll(&mut [usb_hid]);
 
-    let report = critical_section::with(|cs| KEYBOARD_REPORT.borrow_ref(cs).clone());
+    let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
     match usb_hid.push_input(&report) {
         Err(err) => match err {
             UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
@@ -222,5 +225,8 @@ unsafe fn USBCTRL_IRQ() {
         },
         _ => {},
     }
+
+    // macOS doesn't like it when you don't pull this, apparently.
+    // TODO: maybe even parse something here
     usb_hid.pull_raw_output(&mut [0; 64]).ok();
 }
