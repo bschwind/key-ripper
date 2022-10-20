@@ -12,13 +12,14 @@ embedded-hal = "0.2"
 embedded-time = "0.12"
 panic-reset = "0.1"
 rp2040-boot2 = "0.2"
-rp2040-hal = "0.5"
+rp2040-hal = { version = "0.6", features = ["rt", "critical-section-impl"] }
 usb-device = "0.2"
 usbd-hid = "0.6"
+critical-section = { version = "1.0.0" }
 
 # Dependencies for debug probe
 defmt = "0.3" # Macros and support for deferred formatting logging
-defmt-rtt = "0.3" # Contains a definition for a #[global_logger]
+defmt-rtt = "0.4" # Contains a definition for a #[global_logger]
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 
 # Needed to enable DWARF location info
