@@ -1,7 +1,7 @@
 (fp_lib_table
-  (lib (name "footprints")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/footprints")(options "")(descr ""))
   (lib (name "bschwind_slots")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-keyboard-parts/slots.pretty")(options "")(descr ""))
   (lib (name "bschwind_switches_cherry_mx")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-keyboard-parts/switches_cherry_mx.pretty")(options "")(descr ""))
   (lib (name "bschwind_switches_kailh_hotswap")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-keyboard-parts/switches_kailh_hotswap.pretty")(options "")(descr ""))
   (lib (name "bschwind_stabilizers")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-keyboard-parts/stabilizers.pretty")(options "")(descr ""))
+  (lib (name "footprints")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-parts/footprints.pretty")(options "")(descr ""))
 )
