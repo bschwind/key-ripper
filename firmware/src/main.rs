@@ -189,6 +189,7 @@ fn main() -> ! {
     let keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
         .manufacturer("bschwind")
         .product("key ripper")
+        .supports_remote_wakeup(true)
         .build();
     unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
