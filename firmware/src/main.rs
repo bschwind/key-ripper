@@ -4,6 +4,7 @@
 #![no_main]
 #![no_std]
 
+use usb_device::class::UsbClass;
 mod debounce;
 mod hid_descriptor;
 mod key_codes;
@@ -217,7 +218,9 @@ unsafe fn USBCTRL_IRQ() {
     let usb_dev = USB_DEVICE.as_mut().unwrap();
     let usb_hid = USB_HID.as_mut().unwrap();
 
-    usb_dev.poll(&mut [usb_hid]);
+    if usb_dev.poll(&mut [usb_hid]) {
+        usb_hid.poll();
+    }
 
     let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
     if let Err(err) = usb_hid.push_input(&report) {
@@ -236,4 +239,18 @@ unsafe fn USBCTRL_IRQ() {
     // macOS doesn't like it when you don't pull this, apparently.
     // TODO: maybe even parse something here
     usb_hid.pull_raw_output(&mut [0; 64]).ok();
+
+    // Wake the host if a key is pressed and the device supports
+    // remote wakeup.
+    if !report_is_empty(&report)
+        && usb_dev.state() == UsbDeviceState::Suspend
+        && usb_dev.remote_wakeup_enabled()
+    {
+        usb_dev.bus().remote_wakeup();
+    }
+}
+
+fn report_is_empty(report: &KeyboardReport) -> bool {
+    report.modifier != 0
+        || report.keycodes.iter().any(|key| *key != key_codes::KeyCode::Empty as u8)
 }
