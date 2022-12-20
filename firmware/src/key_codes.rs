@@ -87,6 +87,10 @@ pub enum KeyCode {
     VolumeUp = 0x80,
     VolumeDown = 0x81,
 
+    // Keypad keys
+    LeftParen = 0xB6,
+    RightParen = 0xB7,
+
     // Modifier keys
     Fn = 0xF0,
     LeftShift = 0xF1,
