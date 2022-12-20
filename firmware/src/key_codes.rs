@@ -2,7 +2,7 @@ use defmt::Format;
 
 #[allow(unused)]
 #[repr(u8)]
-#[derive(Copy, Clone, Format)]
+#[derive(Copy, Clone, Format, PartialEq)]
 pub enum KeyCode {
     Empty = 0x0,
     A = 0x04,
@@ -76,6 +76,12 @@ pub enum KeyCode {
     Down = 0x51,
     Up = 0x52,
 
+    Home = 0x4A,
+    PageUp = 0x4B,
+    Delete = 0x4C,
+    End = 0x4D,
+    PageDown = 0x4E,
+
     // Media Keys
     VolumeMute = 0x7F,
     VolumeUp = 0x80,
@@ -109,6 +115,6 @@ impl KeyCode {
     }
 
     pub fn is_modifier(&self) -> bool {
-        self.modifier_bitmask().is_some()
+        *self == KeyCode::Fn || self.modifier_bitmask().is_some()
     }
 }

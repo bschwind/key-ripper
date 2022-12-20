@@ -4,7 +4,7 @@ use cortex_m::delay::Delay;
 use embedded_hal::digital::v2::InputPin;
 use usbd_hid::descriptor::KeyboardReport;
 
-use crate::{debounce::Debounce, key_mapping};
+use crate::{debounce::Debounce, key_mapping, key_codes::KeyCode};
 
 #[derive(Clone, Copy)]
 pub struct KeyScan<const NUM_ROWS: usize, const NUM_COLS: usize> {
@@ -60,12 +60,17 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_CO
             }
         };
 
-        let layer_mapping = if scan.matrix[0][5] {
-            key_mapping::FN_LAYER_MAPPING
-        } else {
-            key_mapping::NORMAL_LAYER_MAPPING
-        };
+        // First scan for any function keys being pressed
+        let mut layer_mapping = key_mapping::NORMAL_LAYER_MAPPING;
+        for (matrix_column, mapping_column) in scan.matrix.iter().zip(layer_mapping) {
+            for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
+                if mapping_row == KeyCode::Fn && *key_pressed {
+                    layer_mapping = key_mapping::FN_LAYER_MAPPING;
+                }
+            }
+        }
 
+        // Second scan to generate the correct keycodes given the activated key map
         for (matrix_column, mapping_column) in scan.matrix.iter().zip(layer_mapping) {
             for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
                 if *key_pressed {
