@@ -109,8 +109,3 @@ Nx Diodes
     Basic
     1/16W Thick Film Resistors 50V ±1% ±100ppm/℃ -55℃~+155℃ 5.1kΩ 0402  Chip Resistor - Surface Mount ROHS
     C25905
-
-1.5k ohm R
-    Basic
-    1/16W Thick Film Resistors 50V ±1% ±100ppm/℃ -55℃~+155℃ 1.5kΩ 0402  Chip Resistor - Surface Mount ROHS
-    C25867

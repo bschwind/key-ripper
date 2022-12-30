@@ -4759,10 +4759,10 @@
     (property "LCSC" "C165948" (id 4) (at 36.1609 118.11 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd7d))
-    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd7d))
-    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd7d))
-    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd7d))
+    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd83))
+    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd83))
+    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd83))
+    (pin "0" (uuid debf8ed7-b40f-4de7-8066-19e26ce0dd83))
     (pin "A1" (uuid 716c8bd1-edb9-492a-815e-7cef2bfb0225))
     (pin "A12" (uuid dcf4709e-0aca-422a-9638-11a3010d6771))
     (pin "A4" (uuid 9a2f09b2-7228-4ffc-9140-70464ab83241))
@@ -4925,7 +4925,7 @@
     (property "Reference" "C18" (id 0) (at 92.71 177.165 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "0.1 uF" (id 1) (at 92.71 179.705 0)
+    (property "Value" "100nF" (id 1) (at 92.71 179.705 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (id 2) (at 100.33 176.53 0)
@@ -5316,7 +5316,7 @@
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 556ef9ca-0364-4889-be76-ec9d7d5619ff)
     (property "Reference" "R9" (id 0) (at 64.77 165.735 90))
-    (property "Value" "1k5 ohm" (id 1) (at 64.77 168.275 90))
+    (property "Value" "1k ohm" (id 1) (at 64.77 168.275 90))
     (property "Footprint" "Resistor_SMD:R_0402_1005Metric" (id 2) (at 64.77 172.085 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -7244,7 +7244,7 @@
     (property "Reference" "C3" (id 0) (at 208.28 121.92 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "0.1 uF" (id 1) (at 208.28 124.46 0)
+    (property "Value" "100nF" (id 1) (at 208.28 124.46 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (id 2) (at 215.9 121.285 0)
@@ -7930,7 +7930,7 @@
       (reference "C2") (unit 1) (value "1uF") (footprint "Capacitor_SMD:C_0402_1005Metric")
     )
     (path "/e2a270d9-b44d-424f-bb20-8c5ce86072d8"
-      (reference "C3") (unit 1) (value "0.1 uF") (footprint "Capacitor_SMD:C_0402_1005Metric")
+      (reference "C3") (unit 1) (value "100nF") (footprint "Capacitor_SMD:C_0402_1005Metric")
     )
     (path "/96cb0cd6-ffa9-444f-8cc1-1b5160745ac6"
       (reference "C4") (unit 1) (value "1uF") (footprint "Capacitor_SMD:C_0402_1005Metric")
@@ -7975,7 +7975,7 @@
       (reference "C17") (unit 1) (value "100nF") (footprint "Capacitor_SMD:C_0402_1005Metric")
     )
     (path "/423b905c-bafe-4d42-b1dc-969145b11c60"
-      (reference "C18") (unit 1) (value "0.1 uF") (footprint "Capacitor_SMD:C_0402_1005Metric")
+      (reference "C18") (unit 1) (value "100nF") (footprint "Capacitor_SMD:C_0402_1005Metric")
     )
     (path "/af119a18-3250-43e9-881b-9a53617d7d1d"
       (reference "D1") (unit 1) (value "D_Small") (footprint "Diode_SMD:D_SOD-123")
@@ -8266,7 +8266,7 @@
       (reference "R8") (unit 1) (value "10k ohm") (footprint "Resistor_SMD:R_0402_1005Metric")
     )
     (path "/556ef9ca-0364-4889-be76-ec9d7d5619ff"
-      (reference "R9") (unit 1) (value "1k5 ohm") (footprint "Resistor_SMD:R_0402_1005Metric")
+      (reference "R9") (unit 1) (value "1k ohm") (footprint "Resistor_SMD:R_0402_1005Metric")
     )
     (path "/e7893166-2c2c-41b4-bd84-76ebc2e06551"
       (reference "SW1") (unit 1) (value "ESC") (footprint "bschwind_switches_cherry_mx:cherry_mx_5_pin_1.00u")
