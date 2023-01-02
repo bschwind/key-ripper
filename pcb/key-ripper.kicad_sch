@@ -5597,7 +5597,7 @@
     (property "Value" "30pF" (id 1) (at 146.05 132.08 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (id 2) (at 147.32 125.73 0)
+    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (id 2) (at 147.32 125.73 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 147.32 125.73 0)
@@ -7637,7 +7637,7 @@
     (property "Value" "30pF" (id 1) (at 136.525 129.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (id 2) (at 135.255 125.73 0)
+    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (id 2) (at 135.255 125.73 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 135.255 125.73 0)
@@ -8535,10 +8535,10 @@
       (reference "C5") (unit 1) (value "1uF") (footprint "Capacitor_SMD:C_0402_1005Metric")
     )
     (path "/d71055b4-8d7d-4df8-9391-f9729ebb8303"
-      (reference "C6") (unit 1) (value "30pF") (footprint "Capacitor_SMD:C_0402_1005Metric")
+      (reference "C6") (unit 1) (value "30pF") (footprint "Capacitor_SMD:C_0603_1608Metric")
     )
     (path "/5aa29279-90fb-4e4c-904d-0a1a183027af"
-      (reference "C7") (unit 1) (value "30pF") (footprint "Capacitor_SMD:C_0402_1005Metric")
+      (reference "C7") (unit 1) (value "30pF") (footprint "Capacitor_SMD:C_0603_1608Metric")
     )
     (path "/f114f220-3a87-49ce-835f-d98a152486aa"
       (reference "C8") (unit 1) (value "100nF") (footprint "Capacitor_SMD:C_0402_1005Metric")
