@@ -7,7 +7,7 @@ multi:
       type: kicad
       pcb: pcb/key-ripper.kicad_pcb
   top-plate:
-    gerbers: pcb/production/v0.2/gerber/
+    gerbers: pcb/production/v0.2/top-plate/gerber
     bom: pcb/top-plate/top-plate.kicad_pcb
     color: black
     eda:
