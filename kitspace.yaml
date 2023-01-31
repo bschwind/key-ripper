@@ -1,3 +1,15 @@
-gerbers: pcb/production/v0.2/gerber/
-bom: pcb/production/v0.2/bom.csv
-color: black
+multi:
+  key-ripper:
+    gerbers: pcb/production/v0.2/pcb/gerber/
+    bom: pcb/production/v0.2/pcb/bom.csv
+    color: black
+    eda:
+      type: kicad
+      pcb: pcb/key-ripper.kicad_pcb
+  top-plate:
+    gerbers: pcb/production/v0.2/gerber/
+    bom: pcb/top-plate/top-plate.kicad_pcb
+    color: black
+    eda:
+      type: kicad
+      pcb: pcb/top-plate/top-plate.kicad_pcb
