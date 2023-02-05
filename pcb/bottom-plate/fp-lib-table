@@ -1,3 +1,4 @@
 (fp_lib_table
   (lib (name "bschwind_slots")(type "KiCad")(uri "${KIPRJMOD}/../extra-parts/kicad-keyboard-parts/slots.pretty")(options "")(descr ""))
+  (lib (name "copper-pour-patterns")(type "KiCad")(uri "/Users/brian/projects/key-ripper/pcb/extra-parts/kicad-keyboard-parts/copper-pour-patterns.pretty")(options "")(descr ""))
 )

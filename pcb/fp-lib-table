@@ -4,4 +4,5 @@
   (lib (name "bschwind_switches_kailh_hotswap")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-keyboard-parts/switches_kailh_hotswap.pretty")(options "")(descr ""))
   (lib (name "bschwind_stabilizers")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-keyboard-parts/stabilizers.pretty")(options "")(descr ""))
   (lib (name "footprints")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-parts/footprints.pretty")(options "")(descr ""))
+  (lib (name "copper-pour-patterns")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-keyboard-parts/copper-pour-patterns.pretty")(options "")(descr ""))
 )
