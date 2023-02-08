@@ -458,7 +458,7 @@
   (gr_text "RESET" (at 33.1 105.5) (layer "B.SilkS") (tstamp 9d1710cd-8737-4e2b-ac85-9f5903823550)
     (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
   )
-  (gr_text "key-ripper-bottom-plate\nv0.3" (at 185.8 115.4188) (layer "F.SilkS") (tstamp 24f28f12-6d7c-4e31-a4ea-edd1002f24a5)
+  (gr_text "key-ripper-bottom-plate\nv0.3\ngithub.com/bschwind/key-ripper" (at 185.8 115.4188) (layer "F.SilkS") (tstamp 24f28f12-6d7c-4e31-a4ea-edd1002f24a5)
     (effects (font (size 1 1) (thickness 0.15)))
   )
   (gr_text "JLCJLCJLCJLC" (at 128.7 115.2188) (layer "F.SilkS") (tstamp 73878b2e-6158-441f-80a7-1f70815b39d8)
