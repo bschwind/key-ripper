@@ -1,6 +1,6 @@
 use std::ops::{Add, Mul};
 
-const SQUARE_SIZE: f64 = 5.0;
+const SQUARE_SIZE: f64 = 2.5;
 
 fn main() {
     let board_width = 285.0;
