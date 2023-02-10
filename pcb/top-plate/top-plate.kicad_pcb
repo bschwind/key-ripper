@@ -70,7 +70,7 @@
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
-      (outputdirectory "production/gerber/v0.2/")
+      (outputdirectory "../production/v0.3/top-plate/gerber/")
     )
   )
 
@@ -295,7 +295,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 1e3ed82d-5378-4cb9-80e5-d1c2ad69556e)
     )
@@ -558,7 +558,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 3af935ad-aed9-47a7-be18-272d2ed0161b)
     )
@@ -995,7 +995,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp f39cf238-2b41-4dad-8f8f-bdb26f1c3667)
     )
@@ -1048,7 +1048,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp a9fe10cf-190b-4861-8281-934208cf3ad6)
     )
@@ -1243,7 +1243,7 @@
     (fp_line (start 53.5 -5.5) (end 53.5 -2.8) (layer "Edge.Cuts") (width 0.1) (tstamp f201a773-5d54-4946-b2f9-feb31dda5b49))
     (fp_line (start -6.5 7) (end 6.499672 7.000007) (layer "Edge.Cuts") (width 0.1) (tstamp f23f3c4c-8eb9-4f7c-b346-5c4beb7875ab))
     (fp_arc (start 53 -6) (mid 53.353553 -5.853553) (end 53.5 -5.5) (layer "Edge.Cuts") (width 0.1) (tstamp 061cf889-b445-4392-8b0a-f2afccef3820))
-    (fp_arc (start 6.999672 5.500007) (mid 7.146107 5.146441) (end 7.499672 5.000007) (layer "Edge.Cuts") (width 0.1) (tstamp 0b2b9888-f781-4cbf-9066-3ba4fc94a471))
+    (fp_arc (start 6.999672 5.500007) (mid 7.146108 5.146445) (end 7.499672 5.000007) (layer "Edge.Cuts") (width 0.1) (tstamp 0b2b9888-f781-4cbf-9066-3ba4fc94a471))
     (fp_arc (start 47.975 6.5) (mid 48.328553 6.646447) (end 48.475 7) (layer "Edge.Cuts") (width 0.1) (tstamp 0ee8b5da-016b-4d38-b252-976d41cb0daf))
     (fp_arc (start 46.25 5) (mid 46.603553 5.146447) (end 46.75 5.5) (layer "Edge.Cuts") (width 0.1) (tstamp 180d0a35-50b8-4f60-a5d4-04cc26829a44))
     (fp_arc (start -48.475 7) (mid -48.328553 6.646447) (end -47.975 6.5) (layer "Edge.Cuts") (width 0.1) (tstamp 2efba700-3ac5-40d3-b203-6a61a6f0969d))
@@ -1269,7 +1269,7 @@
     (fp_arc (start -54.2 -2.6) (mid -54.141421 -2.741421) (end -54 -2.8) (layer "Edge.Cuts") (width 0.1) (tstamp c4c06a0d-5e9d-4a7c-a796-1908ca6b6b1e))
     (fp_arc (start -53 6.5) (mid -53.353553 6.353553) (end -53.5 6) (layer "Edge.Cuts") (width 0.1) (tstamp c894bdd6-4751-487e-8ebb-efe8b64e8144))
     (fp_arc (start -7 -5.5) (mid -7.146447 -5.146447) (end -7.5 -5) (layer "Edge.Cuts") (width 0.1) (tstamp cb22ea29-c4b0-44b4-b21f-8621560701dd))
-    (fp_arc (start 6.999672 6.500007) (mid 6.853214 6.853548) (end 6.499672 7.000007) (layer "Edge.Cuts") (width 0.1) (tstamp d53355ba-8e11-492b-8541-18603db6e227))
+    (fp_arc (start 6.999672 6.500007) (mid 6.853215 6.853551) (end 6.499672 7.000007) (layer "Edge.Cuts") (width 0.1) (tstamp d53355ba-8e11-492b-8541-18603db6e227))
     (fp_arc (start 51.775 7) (mid 51.921447 6.646447) (end 52.275 6.5) (layer "Edge.Cuts") (width 0.1) (tstamp e4845fbe-a32c-4b1c-8d09-8459ddf1ac02))
     (fp_arc (start -53.5 -5.5) (mid -53.353553 -5.853553) (end -53 -6) (layer "Edge.Cuts") (width 0.1) (tstamp e527ca92-895b-4c68-8cfa-37d1e6a45bbd))
     (fp_arc (start -46.25 -5) (mid -46.603553 -5.146447) (end -46.75 -5.5) (layer "Edge.Cuts") (width 0.1) (tstamp f059f1a4-b120-4673-9dd4-7b39c5ce9cf8))
@@ -3331,7 +3331,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 67b2496a-8ede-4ccf-b18a-0c2c3cae44c2)
     )
@@ -3414,7 +3414,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 1d848db7-5704-404f-9837-8870b08befb0)
     )
@@ -3557,7 +3557,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 6973b926-c8c6-4665-a91e-24166297df00)
     )
@@ -3700,7 +3700,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 192fc3e4-0a6c-4e79-908e-9b108628946f)
     )
@@ -4221,7 +4221,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 39e42b5b-2a8c-49d2-8eb2-2b93a1846976)
     )
@@ -4244,7 +4244,7 @@
     (descr "Mounting Hole 2.2mm, no annular, M2")
     (tags "mounting hole 2.2mm no annular m2")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS")
+    (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 72b5b541-70c1-4732-8473-c551b44ae548)
     )
