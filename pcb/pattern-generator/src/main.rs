@@ -1,0 +1,127 @@
+use std::ops::Add;
+use std::ops::Mul;
+
+const SQUARE_SIZE: f64 = 5.0;
+
+fn main() {
+    let board_width = 285.0;
+    let board_height = 130.0;
+
+    let diagonal = (SQUARE_SIZE * SQUARE_SIZE + SQUARE_SIZE * SQUARE_SIZE).sqrt();
+    let half_diagonal = diagonal / 2.0;
+
+    let mut x = 0.0;
+
+    while x < board_width {
+        let mut y = 0.0;
+
+        let t = x as f64 / (board_width);
+
+        let mut counter = 0;
+        while y < board_height {
+            let x = if counter % 2 == 0 { x } else { x + half_diagonal };
+            draw_square(x as f64, y, t);
+
+            y += half_diagonal;
+            counter += 1;
+        }
+
+        x += diagonal;
+    }
+}
+
+fn draw_square(x: f64, y: f64, t: f64) {
+    let diagonal = (SQUARE_SIZE * SQUARE_SIZE + SQUARE_SIZE * SQUARE_SIZE).sqrt();
+    let half_diagonal = diagonal / 2.0;
+
+    // let x = x + (y * 0.2).sin() * 10.0;
+
+    // let x_offset = lerp(x + half_diagonal - 0.1, x + 0.1, t);
+
+    // let t = (t * 2.0).sin().abs();
+
+    let points = if t < 0.5 {
+        let t = map_triangle(t);
+        let x_offset = lerp(x + half_diagonal - 0.1, x + 0.1, t);
+
+        vec![
+            (x, y),
+            (x + half_diagonal, y + half_diagonal),
+            (x, y + diagonal),
+
+            (x_offset, y + half_diagonal),
+            (x, y),
+        ]
+    } else {
+        let t = map_triangle(t);
+        let x_offset = lerp(x - half_diagonal + 0.1, x - 0.1, t);
+
+        vec![
+            (x, y),
+            (x - half_diagonal, y + half_diagonal),
+            (x, y + diagonal),
+
+            (x_offset, y + half_diagonal),
+            (x, y),
+        ]
+    };
+
+    let t = map_triangle(t);
+    let x_offset = lerp(x - half_diagonal + 0.1, x - 0.1, t);
+
+    let points = vec![
+        (x, y),
+        (x - half_diagonal, y + half_diagonal),
+        (x, y + diagonal),
+
+        (x_offset, y + half_diagonal),
+        (x, y),
+    ];
+
+
+    let y_offset = lerp(y + diagonal - 0.1, y + half_diagonal + 0.1, t);
+    let points = vec![
+        (x - half_diagonal, y + half_diagonal),
+        (x, y + diagonal),
+        (x + half_diagonal, y + half_diagonal),
+        (x, y_offset),
+        (x - half_diagonal, y + half_diagonal),
+    ];
+
+    // let points = vec![
+    //     (x, y),
+    //     (x + half_diagonal, y + half_diagonal),
+    //     (x, y + diagonal),
+
+    //     (x_offset, y + half_diagonal),
+    //     (x, y),
+    // ];
+
+    println!("(polygon");
+    println!("  (pts");
+
+    for point in points {
+        let (x, y) = point;
+        println!("    (xy {x} {y})");
+    }
+
+    println!("  )");
+    println!(")");
+}
+
+// Maps [0.0, 0.5) to [0.0, 1.0],
+// and [0.5, 1.0) to [1.0, 0.0]
+fn map_triangle(t: f64) -> f64 {
+    if t < 0.5 {
+        t * 2.0
+    } else {
+        1.0 - ((t - 0.5) * 2.0)
+    }
+}
+
+fn lerp<T>(a: T, b: T, t: f64) -> T
+where
+    T: Add<Output = T> + Mul<f64, Output = T>,
+{
+    (a * (1.0 - t)) + (b * t)
+}
