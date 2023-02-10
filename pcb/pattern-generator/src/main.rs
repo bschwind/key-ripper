@@ -1,5 +1,4 @@
-use std::ops::Add;
-use std::ops::Mul;
+use std::ops::{Add, Mul};
 
 const SQUARE_SIZE: f64 = 5.0;
 
@@ -34,50 +33,7 @@ fn draw_square(x: f64, y: f64, t: f64) {
     let diagonal = (SQUARE_SIZE * SQUARE_SIZE + SQUARE_SIZE * SQUARE_SIZE).sqrt();
     let half_diagonal = diagonal / 2.0;
 
-    // let x = x + (y * 0.2).sin() * 10.0;
-
-    // let x_offset = lerp(x + half_diagonal - 0.1, x + 0.1, t);
-
-    // let t = (t * 2.0).sin().abs();
-
-    let points = if t < 0.5 {
-        let t = map_triangle(t);
-        let x_offset = lerp(x + half_diagonal - 0.1, x + 0.1, t);
-
-        vec![
-            (x, y),
-            (x + half_diagonal, y + half_diagonal),
-            (x, y + diagonal),
-
-            (x_offset, y + half_diagonal),
-            (x, y),
-        ]
-    } else {
-        let t = map_triangle(t);
-        let x_offset = lerp(x - half_diagonal + 0.1, x - 0.1, t);
-
-        vec![
-            (x, y),
-            (x - half_diagonal, y + half_diagonal),
-            (x, y + diagonal),
-
-            (x_offset, y + half_diagonal),
-            (x, y),
-        ]
-    };
-
     let t = map_triangle(t);
-    let x_offset = lerp(x - half_diagonal + 0.1, x - 0.1, t);
-
-    let points = vec![
-        (x, y),
-        (x - half_diagonal, y + half_diagonal),
-        (x, y + diagonal),
-
-        (x_offset, y + half_diagonal),
-        (x, y),
-    ];
-
 
     let y_offset = lerp(y + diagonal - 0.1, y + half_diagonal + 0.1, t);
     let points = vec![
@@ -88,20 +44,10 @@ fn draw_square(x: f64, y: f64, t: f64) {
         (x - half_diagonal, y + half_diagonal),
     ];
 
-    // let points = vec![
-    //     (x, y),
-    //     (x + half_diagonal, y + half_diagonal),
-    //     (x, y + diagonal),
-
-    //     (x_offset, y + half_diagonal),
-    //     (x, y),
-    // ];
-
     println!("(polygon");
     println!("  (pts");
 
-    for point in points {
-        let (x, y) = point;
+    for (x, y) in points {
         println!("    (xy {x} {y})");
     }
 
