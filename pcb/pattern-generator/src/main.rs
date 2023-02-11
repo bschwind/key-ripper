@@ -14,12 +14,12 @@ fn main() {
     while x < board_width {
         let mut y = 0.0;
 
-        let t = x as f64 / (board_width);
+        let t = x / (board_width);
 
         let mut counter = 0;
         while y < board_height {
             let x = if counter % 2 == 0 { x } else { x + half_diagonal };
-            draw_square(x as f64, y, t);
+            draw_square(x, y, t);
 
             y += half_diagonal;
             counter += 1;
@@ -58,11 +58,7 @@ fn draw_square(x: f64, y: f64, t: f64) {
 // Maps [0.0, 0.5) to [0.0, 1.0],
 // and [0.5, 1.0) to [1.0, 0.0]
 fn map_triangle(t: f64) -> f64 {
-    if t < 0.5 {
-        t * 2.0
-    } else {
-        1.0 - ((t - 0.5) * 2.0)
-    }
+    1.0 - 2.0 * (t - 0.5).abs()
 }
 
 fn lerp<T>(a: T, b: T, t: f64) -> T
