@@ -4,6 +4,9 @@ A keyboard personalized for myself, designed in KiCad, with custom firmware writ
 
 The story behind this board can be found in [this reddit post](https://www.reddit.com/r/MechanicalKeyboards/comments/vtlujd/i_built_a_keyboard_pcb_and_wrote_firmware_for_it/).
 
+I also gave a (time-constrained) talk on making this keyboard which you can view [here](https://www.youtube.com/watch?v=x7LQevYn7d0).
+Sadly I didn't get to cover everything I wanted to talk about when it comes to embedded Rust, but I hope you find it entertaining.
+
 ## Main Features and Requirements
 
 * Be cheap to manufacture (can easily be ordered and fabricated by JLCPCB, uses an RP2040)
