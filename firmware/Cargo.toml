@@ -11,8 +11,8 @@ cortex-m-rt = "0.7"
 embedded-hal = "0.2"
 embedded-time = "0.12"
 panic-reset = "0.1"
-rp2040-boot2 = "0.2"
-rp2040-hal = { version = "0.6", features = ["rt", "critical-section-impl"] }
+rp2040-boot2 = "0.3"
+rp2040-hal = { version = "0.8", features = ["rt", "critical-section-impl"] }
 usb-device = "0.2"
 usbd-hid = "0.6"
 critical-section = { version = "1.0.0" }
