@@ -48,8 +48,8 @@ const DEBOUNCE_TICKS: u8 = DEBOUNCE_MS / (SCAN_LOOP_RATE_MS as u8);
 #[used]
 pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
 
-const NUM_COLS: usize = 14;
-const NUM_ROWS: usize = 6;
+const NUM_COLS: usize = 4;
+const NUM_ROWS: usize = 10;
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
@@ -102,30 +102,24 @@ fn main() -> ! {
         rp2040_hal::gpio::Pins::new(pac.IO_BANK0, pac.PADS_BANK0, sio.gpio_bank0, &mut pac.RESETS);
 
     // Set up keyboard matrix pins.
-    let rows: &[&dyn InputPin<Error = Infallible>] = &[
-        &pins.gpio26.into_pull_down_input(),
-        &pins.gpio25.into_pull_down_input(),
-        &pins.gpio27.into_pull_down_input(),
-        &pins.gpio28.into_pull_down_input(),
-        &pins.gpio15.into_pull_down_input(),
-        &pins.gpio24.into_pull_down_input(),
-    ];
-
     let cols: &mut [&mut dyn OutputPin<Error = Infallible>] = &mut [
-        &mut pins.gpio29.into_push_pull_output(),
-        &mut pins.gpio16.into_push_pull_output(),
-        &mut pins.gpio17.into_push_pull_output(),
-        &mut pins.gpio18.into_push_pull_output(),
-        &mut pins.gpio9.into_push_pull_output(),
         &mut pins.gpio10.into_push_pull_output(),
-        &mut pins.gpio19.into_push_pull_output(),
         &mut pins.gpio11.into_push_pull_output(),
         &mut pins.gpio12.into_push_pull_output(),
         &mut pins.gpio13.into_push_pull_output(),
-        &mut pins.gpio14.into_push_pull_output(),
-        &mut pins.gpio20.into_push_pull_output(),
-        &mut pins.gpio22.into_push_pull_output(),
-        &mut pins.gpio23.into_push_pull_output(),
+    ];
+
+    let rows: &[&dyn InputPin<Error = Infallible>] = &[
+        &pins.gpio9.into_pull_down_input(),
+        &pins.gpio8.into_pull_down_input(),
+        &pins.gpio7.into_pull_down_input(),
+        &pins.gpio6.into_pull_down_input(),
+        &pins.gpio5.into_pull_down_input(),
+        &pins.gpio4.into_pull_down_input(),
+        &pins.gpio3.into_pull_down_input(),
+        &pins.gpio2.into_pull_down_input(),
+        &pins.gpio1.into_pull_down_input(),
+        &pins.gpio0.into_pull_down_input(),
     ];
 
     // Initialize a delay for accurate sleeping.
