@@ -6,6 +6,7 @@ jobs:
   clippy:
     name: Cargo Clippy
     runs-on: ubuntu-latest
+    working-directory: firmware/
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -18,4 +19,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --manifest-path firmware/Cargo.toml --all-targets -- -D warnings
+          args: --all-targets -- -D warnings
