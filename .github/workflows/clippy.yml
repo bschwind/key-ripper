@@ -6,7 +6,6 @@ jobs:
   clippy:
     name: Cargo Clippy
     runs-on: ubuntu-latest
-    working-directory: firmware/
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -17,6 +16,7 @@ jobs:
           components: clippy
       - run: rustup target install thumbv6m-none-eabi
       - uses: actions-rs/cargo@v1
+        working-directory: firmware/
         with:
           command: clippy
           args: --all-targets -- -D warnings

@@ -15,6 +15,7 @@ jobs:
           override: true
           components: rustfmt
       - uses: actions-rs/cargo@v1
+        working-directory: firmware/
         with:
           command: fmt
-          args: --manifest-path firmware/Cargo.toml --all -- --check
+          args: --all -- --check
