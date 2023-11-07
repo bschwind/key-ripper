@@ -5,7 +5,6 @@ name: Cargo Format
 jobs:
   fmt:
     name: Cargo Format
-    working-directory: firmware
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,6 +15,7 @@ jobs:
           override: true
           components: rustfmt
       - uses: actions-rs/cargo@v1
+        working-directory: firmware
         with:
           command: fmt
           args: --all -- --check
