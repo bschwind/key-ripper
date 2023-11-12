@@ -16,4 +16,4 @@ jobs:
         with:
           toolchain: nightly
           components: rustfmt
-      - run: cargo fmt --all -- --check
+      - run: cd firmware && cargo fmt --all -- --check
