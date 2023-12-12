@@ -215,38 +215,35 @@ fn main() -> ! {
 #[allow(non_snake_case)]
 #[interrupt]
 unsafe fn USBCTRL_IRQ() {
-    let usb_dev = USB_DEVICE.as_mut().unwrap();
-    let usb_hid = USB_HID.as_mut().unwrap();
+    if let (Some(usb_dev), Some(usb_hid)) = (USB_DEVICE.as_mut(), USB_HID.as_mut()) {
+        usb_dev.poll(&mut [usb_hid]);
 
-    if usb_dev.poll(&mut [usb_hid]) {
-        usb_hid.poll();
-    }
-
-    let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
-    if let Err(err) = usb_hid.push_input(&report) {
-        match err {
-            UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
-            UsbError::ParseError => error!("UsbError::ParseError"),
-            UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
-            UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
-            UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
-            UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
-            UsbError::Unsupported => error!("UsbError::Unsupported"),
-            UsbError::InvalidState => error!("UsbError::InvalidState"),
+        let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
+        if let Err(err) = usb_hid.push_input(&report) {
+            match err {
+                UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
+                UsbError::ParseError => error!("UsbError::ParseError"),
+                UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
+                UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
+                UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
+                UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
+                UsbError::Unsupported => error!("UsbError::Unsupported"),
+                UsbError::InvalidState => error!("UsbError::InvalidState"),
+            }
         }
-    }
 
-    // macOS doesn't like it when you don't pull this, apparently.
-    // TODO: maybe even parse something here
-    usb_hid.pull_raw_output(&mut [0; 64]).ok();
+        // macOS doesn't like it when you don't pull this, apparently.
+        // TODO: maybe even parse something here
+        usb_hid.pull_raw_output(&mut [0; 64]).ok();
 
-    // Wake the host if a key is pressed and the device supports
-    // remote wakeup.
-    if !report_is_empty(&report)
-        && usb_dev.state() == UsbDeviceState::Suspend
-        && usb_dev.remote_wakeup_enabled()
-    {
-        usb_dev.bus().remote_wakeup();
+        // Wake the host if a key is pressed and the device supports
+        // remote wakeup.
+        if !report_is_empty(&report)
+            && usb_dev.state() == UsbDeviceState::Suspend
+            && usb_dev.remote_wakeup_enabled()
+        {
+            usb_dev.bus().remote_wakeup();
+        }
     }
 }
 
