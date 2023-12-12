@@ -4,7 +4,6 @@
 #![no_main]
 #![no_std]
 
-use usb_device::class::UsbClass;
 mod debounce;
 mod hid_descriptor;
 mod key_codes;

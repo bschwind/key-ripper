@@ -13,9 +13,9 @@ embedded-time = "0.12"
 panic-reset = "0.1"
 rp2040-boot2 = "0.3"
 rp2040-hal = { version = "0.9", features = ["rt", "critical-section-impl"] }
-usb-device = "0.2"
-usbd-hid = "0.6"
-critical-section = { version = "1.0.0" }
+usb-device = "0.2" # TODO - Update
+usbd-hid = "0.6" # TODO - Update
+critical-section = "1"
 
 # Dependencies for debug probe
 defmt = "0.3" # Macros and support for deferred formatting logging
