@@ -1,10 +1,14 @@
+use crate::{
+    key_mapping::{FN_LAYER_MAPPING, NORMAL_LAYER_MAPPING},
+    NUM_COLS, NUM_ROWS,
+};
 use core::{convert::Infallible, ops::Deref};
 
 use cortex_m::delay::Delay;
 use embedded_hal::digital::v2::InputPin;
 use usbd_hid::descriptor::KeyboardReport;
 
-use crate::{debounce::Debounce, key_codes::KeyCode, key_mapping};
+use crate::{debounce::Debounce, key_codes::KeyCode};
 
 #[derive(Clone, Copy)]
 pub struct KeyScan<const NUM_ROWS: usize, const NUM_COLS: usize> {
@@ -61,11 +65,11 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_CO
         };
 
         // First scan for any function keys being pressed
-        let mut layer_mapping = key_mapping::NORMAL_LAYER_MAPPING;
+        let mut layer_mapping = TRANSPOSED_NORMAL_LAYER_MAPPING;
         for (matrix_column, mapping_column) in scan.matrix.iter().zip(layer_mapping) {
             for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
                 if mapping_row == KeyCode::Fn && *key_pressed {
-                    layer_mapping = key_mapping::FN_LAYER_MAPPING;
+                    layer_mapping = TRANSPOSED_FN_LAYER_MAPPING;
                 }
             }
         }
@@ -85,4 +89,32 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_CO
 
         KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
     }
+}
+
+// We need the key mappings to be transposed because the key mapping is
+// defined as [[KeyCode; NUM_COLS]; NUM_ROWS] but our scanning logic
+// assumes [[KeyCode; NUM_ROWS]; NUM_COLS].
+pub const TRANSPOSED_NORMAL_LAYER_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] =
+    transpose(NORMAL_LAYER_MAPPING);
+pub const TRANSPOSED_FN_LAYER_MAPPING: [[KeyCode; NUM_ROWS]; NUM_COLS] =
+    transpose(FN_LAYER_MAPPING);
+
+pub const fn transpose<const NUM_ROWS: usize, const NUM_COLS: usize>(
+    matrix: [[KeyCode; NUM_COLS]; NUM_ROWS],
+) -> [[KeyCode; NUM_ROWS]; NUM_COLS] {
+    let mut new_matrix: [[KeyCode; NUM_ROWS]; NUM_COLS] = [[KeyCode::Empty; NUM_ROWS]; NUM_COLS];
+
+    let mut col = 0;
+
+    while col < NUM_COLS {
+        let mut row = 0;
+        while row < NUM_ROWS {
+            new_matrix[col][row] = matrix[row][col];
+            row += 1;
+        }
+
+        col += 1;
+    }
+
+    new_matrix
 }

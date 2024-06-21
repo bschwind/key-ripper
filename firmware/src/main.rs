@@ -4,6 +4,7 @@
 #![no_main]
 #![no_std]
 
+use crate::key_scan::TRANSPOSED_NORMAL_LAYER_MAPPING;
 use usb_device::class::UsbClass;
 mod debounce;
 mod hid_descriptor;
@@ -132,7 +133,7 @@ fn main() -> ! {
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
     let mut modifier_mask = [[false; NUM_ROWS]; NUM_COLS];
-    for (col, mapping_col) in modifier_mask.iter_mut().zip(key_mapping::NORMAL_LAYER_MAPPING) {
+    for (col, mapping_col) in modifier_mask.iter_mut().zip(TRANSPOSED_NORMAL_LAYER_MAPPING) {
         for (key, mapping_key) in col.iter_mut().zip(mapping_col) {
             *key = mapping_key.is_modifier();
         }
