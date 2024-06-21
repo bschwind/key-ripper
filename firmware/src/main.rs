@@ -102,7 +102,7 @@ fn main() -> ! {
         rp2040_hal::gpio::Pins::new(pac.IO_BANK0, pac.PADS_BANK0, sio.gpio_bank0, &mut pac.RESETS);
 
     // Set up keyboard matrix pins.
-    let rows: &[&dyn InputPin<Error = Infallible>] = &[
+    let rows: [&dyn InputPin<Error = Infallible>; NUM_ROWS] = [
         &pins.gpio26.into_pull_down_input(),
         &pins.gpio25.into_pull_down_input(),
         &pins.gpio27.into_pull_down_input(),
@@ -111,7 +111,7 @@ fn main() -> ! {
         &pins.gpio24.into_pull_down_input(),
     ];
 
-    let cols: &mut [&mut dyn OutputPin<Error = Infallible>] = &mut [
+    let mut cols: [&mut dyn OutputPin<Error = Infallible>; NUM_COLS] = [
         &mut pins.gpio29.into_push_pull_output(),
         &mut pins.gpio16.into_push_pull_output(),
         &mut pins.gpio17.into_push_pull_output(),
@@ -142,7 +142,7 @@ fn main() -> ! {
     let mut debounce: Debounce<NUM_ROWS, NUM_COLS> = Debounce::new(DEBOUNCE_TICKS, modifier_mask);
 
     // Do an initial scan of the keys so that we immediately have something to report to the host when asked.
-    let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
+    let scan = KeyScan::scan(rows, &mut cols, &mut delay, &mut debounce);
     critical_section::with(|cs| {
         KEYBOARD_REPORT.replace(cs, scan.into());
     });
@@ -203,7 +203,7 @@ fn main() -> ! {
     }
     info!("Entering main loop");
     loop {
-        let scan = KeyScan::scan(rows, cols, &mut delay, &mut debounce);
+        let scan = KeyScan::scan(rows, &mut cols, &mut delay, &mut debounce);
         critical_section::with(|cs| {
             KEYBOARD_REPORT.replace(cs, scan.into());
         });

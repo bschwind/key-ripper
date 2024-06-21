@@ -21,8 +21,8 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Deref for KeyScan<NUM_ROWS, N
 
 impl<const NUM_ROWS: usize, const NUM_COLS: usize> KeyScan<NUM_ROWS, NUM_COLS> {
     pub fn scan(
-        rows: &[&dyn InputPin<Error = Infallible>],
-        columns: &mut [&mut dyn embedded_hal::digital::v2::OutputPin<Error = Infallible>],
+        rows: [&dyn InputPin<Error = Infallible>; NUM_ROWS],
+        columns: &mut [&mut dyn embedded_hal::digital::v2::OutputPin<Error = Infallible>; NUM_COLS],
         delay: &mut Delay,
         debounce: &mut Debounce<NUM_ROWS, NUM_COLS>,
     ) -> Self {
