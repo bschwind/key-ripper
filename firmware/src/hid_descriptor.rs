@@ -19,18 +19,21 @@ pub const KEYBOARD_REPORT_DESCRIPTOR: &[u8] = &[
     0x75, 0x08,        //   Report Size (8)
     0x81, 0x01,        //   Input (Const,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
 
-    // LEDs
-    0x05, 0x08,        //   Usage Page (LEDs)
-    0x19, 0x01,        //   Usage Minimum (Num Lock)
-    0x29, 0x05,        //   Usage Maximum (Kana)
-    0x95, 0x05,        //   Report Count (5)
-    0x75, 0x01,        //   Report Size (1)
-    0x91, 0x02,        //   Output (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+    // Currently commented out as the presence of this in the descriptor
+    // seems to cause certain versions of MacOS to delay initialization
+    // of the keyboard up to 20 seconds.
+    // // LEDs
+    // 0x05, 0x08,        //   Usage Page (LEDs)
+    // 0x19, 0x01,        //   Usage Minimum (Num Lock)
+    // 0x29, 0x05,        //   Usage Maximum (Kana)
+    // 0x95, 0x05,        //   Report Count (5)
+    // 0x75, 0x01,        //   Report Size (1)
+    // 0x91, 0x02,        //   Output (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
 
-    // LED Padding
-    0x95, 0x01,        //   Report Count (1)
-    0x75, 0x03,        //   Report Size (3)
-    0x91, 0x01,        //   Output (Const,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+    // // LED Padding
+    // 0x95, 0x01,        //   Report Count (1)
+    // 0x75, 0x03,        //   Report Size (3)
+    // 0x91, 0x01,        //   Output (Const,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
 
     // Keycodes
     0x05, 0x07,        //   Usage Page (Kbrd/Keypad)
