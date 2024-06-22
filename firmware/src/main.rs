@@ -252,6 +252,6 @@ unsafe fn USBCTRL_IRQ() {
 }
 
 fn report_is_empty(report: &KeyboardReport) -> bool {
-    report.modifier != 0
-        || report.keycodes.iter().any(|key| *key != key_codes::KeyCode::Empty as u8)
+    report.modifier == 0
+        && report.keycodes.iter().all(|key| *key == key_codes::KeyCode::Empty as u8)
 }
