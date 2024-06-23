@@ -20,7 +20,23 @@ Sadly I didn't get to cover everything I wanted to talk about when it comes to e
 * Easy to assemble - this will apply once I design a case for it
 * Firmware written in Rust, debuggable with knurling-rs
 
-## Current Version (v0.2)
+## Current Version (v0.3)
+
+[v0.3 JLCPCB Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.3)
+
+Version 0.3 adds some iterative hardware improvements over v0.2:
+
+* Added support for threaded inserts on the PCB
+* Added pass-through holes for M2 hex spacers
+* Better impedance matching on the USB lines
+* Added a cross-hatch copper pour to reduce warping compared to a solid copper pour
+* Added some test points on the board
+* Moved many components to a 1608 metric size for easier soldering
+* Added an optional TRRS connector footprint for connecting to a debug probe
+* Switched to a much smaller QSPI flash chip
+* Added fancier patterns on the top and bottom plates
+
+## v0.2
 
 [v0.2 JLCPCB Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.2)
 
