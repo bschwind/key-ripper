@@ -5,7 +5,7 @@ use crate::{
 use core::{convert::Infallible, ops::Deref};
 
 use cortex_m::delay::Delay;
-use embedded_hal::digital::v2::InputPin;
+use embedded_hal::digital::InputPin;
 use usbd_hid::descriptor::KeyboardReport;
 
 use crate::{debounce::Debounce, key_codes::KeyCode};
@@ -25,8 +25,8 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Deref for KeyScan<NUM_ROWS, N
 
 impl<const NUM_ROWS: usize, const NUM_COLS: usize> KeyScan<NUM_ROWS, NUM_COLS> {
     pub fn scan(
-        rows: [&dyn InputPin<Error = Infallible>; NUM_ROWS],
-        columns: &mut [&mut dyn embedded_hal::digital::v2::OutputPin<Error = Infallible>; NUM_COLS],
+        rows: &mut [&mut dyn InputPin<Error = Infallible>; NUM_ROWS],
+        columns: &mut [&mut dyn embedded_hal::digital::OutputPin<Error = Infallible>; NUM_COLS],
         delay: &mut Delay,
         debounce: &mut Debounce<NUM_ROWS, NUM_COLS>,
     ) -> Self {
@@ -36,7 +36,7 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> KeyScan<NUM_ROWS, NUM_COLS> {
             gpio_col.set_high().unwrap();
             delay.delay_us(10);
 
-            for (gpio_row, matrix_row) in rows.iter().zip(matrix_col.iter_mut()) {
+            for (gpio_row, matrix_row) in rows.iter_mut().zip(matrix_col.iter_mut()) {
                 *matrix_row = gpio_row.is_high().unwrap();
             }
 
