@@ -3,10 +3,11 @@ use crate::{
     NUM_COLS, NUM_ROWS,
 };
 use core::{convert::Infallible, ops::Deref};
+use usbd_human_interface_device::page::Keyboard;
 
 use cortex_m::delay::Delay;
 use embedded_hal::digital::InputPin;
-use usbd_hid::descriptor::KeyboardReport;
+// use usbd_hid::descriptor::KeyboardReport;
 
 use crate::{debounce::Debounce, key_codes::KeyCode};
 
@@ -47,15 +48,10 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> KeyScan<NUM_ROWS, NUM_COLS> {
         let matrix = debounce.report_and_tick(&raw_matrix);
         Self { matrix }
     }
-}
 
-impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_COLS>>
-    for KeyboardReport
-{
-    fn from(scan: KeyScan<NUM_ROWS, NUM_COLS>) -> Self {
-        let mut keycodes = [0u8; 6];
+    pub fn keys(&self) -> impl Iterator<Item = Keyboard> {
+        let mut keycodes = [Keyboard::NoEventIndicated; 6];
         let mut keycode_index = 0;
-        let mut modifier = 0;
 
         let mut push_keycode = |key| {
             if keycode_index < keycodes.len() {
@@ -66,7 +62,7 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_CO
 
         // First scan for any function keys being pressed
         let mut layer_mapping = TRANSPOSED_NORMAL_LAYER_MAPPING;
-        for (matrix_column, mapping_column) in scan.matrix.iter().zip(layer_mapping) {
+        for (matrix_column, mapping_column) in self.matrix.iter().zip(layer_mapping) {
             for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
                 if mapping_row == KeyCode::Fn && *key_pressed {
                     layer_mapping = TRANSPOSED_FN_LAYER_MAPPING;
@@ -75,21 +71,70 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_CO
         }
 
         // Second scan to generate the correct keycodes given the activated key map
-        for (matrix_column, mapping_column) in scan.matrix.iter().zip(layer_mapping) {
+        for (matrix_column, mapping_column) in self.matrix.iter().zip(layer_mapping) {
             for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
                 if *key_pressed {
-                    if let Some(bitmask) = mapping_row.modifier_bitmask() {
-                        modifier |= bitmask;
+                    if let Some(_bitmask) = mapping_row.modifier_bitmask() {
+                        // modifier |= bitmask;
                     } else {
-                        push_keycode(mapping_row as u8);
+                        let code = match mapping_row {
+                            KeyCode::A => Keyboard::A,
+                            KeyCode::S => Keyboard::S,
+                            KeyCode::D => Keyboard::D,
+                            KeyCode::F => Keyboard::F,
+                            _ => Keyboard::NoEventIndicated,
+                        };
+                        push_keycode(code);
                     }
                 }
             }
         }
 
-        KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
+        keycodes.into_iter()
     }
 }
+
+// impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_COLS>>
+//     for [Keyboard; 6]
+// {
+//     fn from(scan: KeyScan<NUM_ROWS, NUM_COLS>) -> Self {
+//         let mut keycodes = [Keyboard; 6];
+//         let mut keycode_index = 0;
+//         let mut modifier = 0;
+
+//         let mut push_keycode = |key| {
+//             if keycode_index < keycodes.len() {
+//                 keycodes[keycode_index] = key;
+//                 keycode_index += 1;
+//             }
+//         };
+
+//         // First scan for any function keys being pressed
+//         let mut layer_mapping = TRANSPOSED_NORMAL_LAYER_MAPPING;
+//         for (matrix_column, mapping_column) in scan.matrix.iter().zip(layer_mapping) {
+//             for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
+//                 if mapping_row == KeyCode::Fn && *key_pressed {
+//                     layer_mapping = TRANSPOSED_FN_LAYER_MAPPING;
+//                 }
+//             }
+//         }
+
+//         // Second scan to generate the correct keycodes given the activated key map
+//         for (matrix_column, mapping_column) in scan.matrix.iter().zip(layer_mapping) {
+//             for (key_pressed, mapping_row) in matrix_column.iter().zip(mapping_column) {
+//                 if *key_pressed {
+//                     if let Some(bitmask) = mapping_row.modifier_bitmask() {
+//                         modifier |= bitmask;
+//                     } else {
+//                         push_keycode(mapping_row as u8);
+//                     }
+//                 }
+//             }
+//         }
+
+//         KeyboardReport { modifier, reserved: 0, leds: 0, keycodes }
+//     }
+// }
 
 // We need the key mappings to be transposed because the key mapping is
 // defined as [[KeyCode; NUM_COLS]; NUM_ROWS] but our scanning logic

@@ -10,11 +10,13 @@ cortex-m = "0.7"
 cortex-m-rt = "0.7"
 embedded-hal = "1"
 embedded-time = "0.12"
+fugit = "0.3"
 panic-reset = "0.1"
 rp2040-boot2 = "0.3"
 rp2040-hal = { version = "0.10", features = ["rt", "critical-section-impl"] }
 usb-device = "0.3"
-usbd-hid = "0.7"
+# usbd-hid = "0.7"
+usbd-human-interface-device = "0.5"
 critical-section = { version = "1" }
 
 # Dependencies for debug probe

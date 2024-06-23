@@ -5,7 +5,9 @@
 #![no_std]
 
 use crate::key_scan::TRANSPOSED_NORMAL_LAYER_MAPPING;
+use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use usb_device::class::UsbClass;
+use usbd_human_interface_device::{usb_class::UsbHidClassBuilder, UsbHidError};
 mod debounce;
 mod hid_descriptor;
 mod key_codes;
@@ -17,6 +19,7 @@ use critical_section::Mutex;
 use defmt::{error, info, warn};
 use defmt_rtt as _;
 use embedded_hal::digital::{InputPin, OutputPin};
+use fugit::ExtU32;
 use panic_probe as _;
 use rp2040_hal::{
     pac::{self, interrupt},
@@ -24,12 +27,12 @@ use rp2040_hal::{
     Clock, Watchdog,
 };
 use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::*};
-use usbd_hid::{
-    descriptor::KeyboardReport,
-    hid_class::{
-        HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
-    },
-};
+// use usbd_hid::{
+//     descriptor::KeyboardReport,
+//     hid_class::{
+//         HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
+//     },
+// };
 
 use debounce::Debounce;
 use key_scan::KeyScan;
@@ -54,22 +57,22 @@ const NUM_ROWS: usize = 6;
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
-/// The USB Device Driver (shared with the interrupt).
-static mut USB_DEVICE: Option<UsbDevice<usb::UsbBus>> = None;
+// /// The USB Device Driver (shared with the interrupt).
+// static mut USB_DEVICE: Option<UsbDevice<usb::UsbBus>> = None;
 
-/// The USB Bus Driver (shared with the interrupt).
-static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
+// /// The USB Bus Driver (shared with the interrupt).
+// static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 
-/// The USB Human Interface Device Driver (shared with the interrupt).
-static mut USB_HID: Option<HIDClass<usb::UsbBus>> = None;
+// /// The USB Human Interface Device Driver (shared with the interrupt).
+// static mut USB_HID: Option<HIDClass<usb::UsbBus>> = None;
 
-/// The latest keyboard report for responding to USB interrupts.
-static KEYBOARD_REPORT: Mutex<RefCell<KeyboardReport>> = Mutex::new(RefCell::new(KeyboardReport {
-    modifier: 0,
-    reserved: 0,
-    leds: 0,
-    keycodes: [0u8; 6],
-}));
+// /// The latest keyboard report for responding to USB interrupts.
+// static KEYBOARD_REPORT: Mutex<RefCell<KeyboardReport>> = Mutex::new(RefCell::new(KeyboardReport {
+//     modifier: 0,
+//     reserved: 0,
+//     leds: 0,
+//     keycodes: [0u8; 6],
+// }));
 
 #[defmt::panic_handler]
 fn panic() -> ! {
@@ -131,6 +134,7 @@ fn main() -> ! {
 
     // Initialize a delay for accurate sleeping.
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
+    let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS, &clocks);
 
     let mut modifier_mask = [[false; NUM_ROWS]; NUM_COLS];
     for (col, mapping_col) in modifier_mask.iter_mut().zip(TRANSPOSED_NORMAL_LAYER_MAPPING) {
@@ -144,9 +148,9 @@ fn main() -> ! {
 
     // Do an initial scan of the keys so that we immediately have something to report to the host when asked.
     let scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce);
-    critical_section::with(|cs| {
-        KEYBOARD_REPORT.replace(cs, scan.into());
-    });
+    // critical_section::with(|cs| {
+    //     KEYBOARD_REPORT.replace(cs, scan.into());
+    // });
 
     // If the Escape key is pressed during power-on, we should go into bootloader mode.
     if scan[0][0] {
@@ -167,92 +171,143 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
     let bus_allocator = UsbBusAllocator::new(usb_bus);
-    let bus_ref = unsafe {
-        // Note (safety): This is safe as interrupts haven't been started yet
-        USB_BUS = Some(bus_allocator);
-        // We are promising to the compiler not to take mutable access to this global
-        // variable while this reference exists!
-        USB_BUS.as_ref().unwrap()
-    };
+    // let bus_ref = unsafe {
+    //     // Note (safety): This is safe as interrupts haven't been started yet
+    //     USB_BUS = Some(bus_allocator);
+    //     // We are promising to the compiler not to take mutable access to this global
+    //     // variable while this reference exists!
+    //     USB_BUS.as_ref().unwrap()
+    // };
 
-    let hid_endpoint = HIDClass::new_with_settings(
-        bus_ref,
-        hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
-        USB_POLL_RATE_MS,
-        HidClassSettings {
-            subclass: HidSubClass::NoSubClass,
-            protocol: HidProtocol::Keyboard,
-            config: ProtocolModeConfig::ForceReport,
-            locale: HidCountryCode::US,
-        },
-    );
+    // let hid_endpoint = HIDClass::new_with_settings(
+    //     bus_ref,
+    //     hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
+    //     USB_POLL_RATE_MS,
+    //     HidClassSettings {
+    //         subclass: HidSubClass::NoSubClass,
+    //         protocol: HidProtocol::Keyboard,
+    //         config: ProtocolModeConfig::ForceReport,
+    //         locale: HidCountryCode::US,
+    //     },
+    // );
+
+    let mut keyboard =
+        UsbHidClassBuilder::new()
+            .add_device(
+                usbd_human_interface_device::device::keyboard::NKROBootKeyboardConfig::default(),
+            )
+            .build(&bus_allocator);
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
-    let keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
+    let mut keyboard_usb_device = UsbDeviceBuilder::new(&bus_allocator, UsbVidPid(0x16c0, 0x27db))
         .supports_remote_wakeup(true)
         .strings(&[StringDescriptors::default().manufacturer("bschwind").product("key ripper")])
         .unwrap()
         .build();
 
-    unsafe {
-        // Note (safety): This is safe as interrupts haven't been started yet
-        USB_HID = Some(hid_endpoint);
-        USB_DEVICE = Some(keyboard_usb_device);
-    }
-    info!("Enabling USB interrupt handler");
-    unsafe {
-        pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
-    }
+    // unsafe {
+    //     // Note (safety): This is safe as interrupts haven't been started yet
+    //     USB_HID = Some(hid_endpoint);
+    //     USB_DEVICE = Some(keyboard_usb_device);
+    // }
+    // info!("Enabling USB interrupt handler");
+    // unsafe {
+    //     pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
+    // }
     info!("Entering main loop");
+
+    let mut input_count_down = timer.count_down();
+    input_count_down.start(10.millis());
+
+    let mut tick_count_down = timer.count_down();
+    tick_count_down.start(1.millis());
+
     loop {
-        let scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce);
-        critical_section::with(|cs| {
-            KEYBOARD_REPORT.replace(cs, scan.into());
-        });
-        delay.delay_ms(SCAN_LOOP_RATE_MS);
-    }
-}
+        if input_count_down.wait().is_ok() {
+            let _scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce);
+            let keys = scan.keys();
 
-/// Handle USB interrupts, used by the host to "poll" the keyboard for new inputs.
-#[allow(non_snake_case)]
-#[interrupt]
-unsafe fn USBCTRL_IRQ() {
-    let usb_dev = USB_DEVICE.as_mut().unwrap();
-    let usb_hid = USB_HID.as_mut().unwrap();
-
-    if usb_dev.poll(&mut [usb_hid]) {
-        usb_hid.poll();
-    }
-
-    let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
-    if let Err(err) = usb_hid.push_input(&report) {
-        match err {
-            UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
-            UsbError::ParseError => error!("UsbError::ParseError"),
-            UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
-            UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
-            UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
-            UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
-            UsbError::Unsupported => error!("UsbError::Unsupported"),
-            UsbError::InvalidState => error!("UsbError::InvalidState"),
+            match keyboard.device().write_report(keys) {
+                Err(UsbHidError::WouldBlock) => {},
+                Err(UsbHidError::Duplicate) => {},
+                Ok(_) => {},
+                Err(e) => {
+                    core::panic!("Failed to write keyboard report: {:?}", e)
+                },
+            };
         }
-    }
 
-    // macOS doesn't like it when you don't pull this, apparently.
-    // TODO: maybe even parse something here
-    usb_hid.pull_raw_output(&mut [0; 64]).ok();
+        if tick_count_down.wait().is_ok() {
+            match keyboard.tick() {
+                Err(UsbHidError::WouldBlock) => {},
+                Ok(_) => {},
+                Err(e) => {
+                    core::panic!("Failed to process keyboard tick: {:?}", e)
+                },
+            };
+        }
 
-    // Wake the host if a key is pressed and the device supports
-    // remote wakeup.
-    if !report_is_empty(&report)
-        && usb_dev.state() == UsbDeviceState::Suspend
-        && usb_dev.remote_wakeup_enabled()
-    {
-        usb_dev.bus().remote_wakeup();
+        if keyboard_usb_device.poll(&mut [&mut keyboard]) {
+            match keyboard.device().read_report() {
+                Err(UsbError::WouldBlock) => {
+                    //do nothing
+                },
+                Err(e) => {
+                    core::panic!("Failed to read keyboard report: {:?}", e)
+                },
+                Ok(_leds) => {
+                    // led_pin.set_state(PinState::from(leds.num_lock)).ok();
+                },
+            }
+        }
+
+        // critical_section::with(|cs| {
+        //     KEYBOARD_REPORT.replace(cs, scan.into());
+        // });
+        // delay.delay_ms(SCAN_LOOP_RATE_MS);
     }
 }
 
-fn report_is_empty(report: &KeyboardReport) -> bool {
-    report.modifier == 0
-        && report.keycodes.iter().all(|key| *key == key_codes::KeyCode::Empty as u8)
-}
+// /// Handle USB interrupts, used by the host to "poll" the keyboard for new inputs.
+// #[allow(non_snake_case)]
+// #[interrupt]
+// unsafe fn USBCTRL_IRQ() {
+//     let usb_dev = USB_DEVICE.as_mut().unwrap();
+//     let usb_hid = USB_HID.as_mut().unwrap();
+
+//     if usb_dev.poll(&mut [usb_hid]) {
+//         usb_hid.poll();
+//     }
+
+//     let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
+//     if let Err(err) = usb_hid.push_input(&report) {
+//         match err {
+//             UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
+//             UsbError::ParseError => error!("UsbError::ParseError"),
+//             UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
+//             UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
+//             UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
+//             UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
+//             UsbError::Unsupported => error!("UsbError::Unsupported"),
+//             UsbError::InvalidState => error!("UsbError::InvalidState"),
+//         }
+//     }
+
+//     // macOS doesn't like it when you don't pull this, apparently.
+//     // TODO: maybe even parse something here
+//     usb_hid.pull_raw_output(&mut [0; 64]).ok();
+
+//     // Wake the host if a key is pressed and the device supports
+//     // remote wakeup.
+//     if !report_is_empty(&report)
+//         && usb_dev.state() == UsbDeviceState::Suspend
+//         && usb_dev.remote_wakeup_enabled()
+//     {
+//         usb_dev.bus().remote_wakeup();
+//     }
+// }
+
+// fn report_is_empty(report: &KeyboardReport) -> bool {
+//     report.modifier == 0
+//         && report.keycodes.iter().all(|key| *key == key_codes::KeyCode::Empty as u8)
+// }
