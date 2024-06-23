@@ -16,7 +16,7 @@ use core::{cell::RefCell, convert::Infallible};
 use critical_section::Mutex;
 use defmt::{error, info, warn};
 use defmt_rtt as _;
-use embedded_hal::digital::v2::{InputPin, OutputPin};
+use embedded_hal::digital::{InputPin, OutputPin};
 use panic_probe as _;
 use rp2040_hal::{
     pac::{self, interrupt},
@@ -103,13 +103,13 @@ fn main() -> ! {
         rp2040_hal::gpio::Pins::new(pac.IO_BANK0, pac.PADS_BANK0, sio.gpio_bank0, &mut pac.RESETS);
 
     // Set up keyboard matrix pins.
-    let rows: [&dyn InputPin<Error = Infallible>; NUM_ROWS] = [
-        &pins.gpio26.into_pull_down_input(),
-        &pins.gpio25.into_pull_down_input(),
-        &pins.gpio27.into_pull_down_input(),
-        &pins.gpio28.into_pull_down_input(),
-        &pins.gpio15.into_pull_down_input(),
-        &pins.gpio24.into_pull_down_input(),
+    let mut rows: [&mut dyn InputPin<Error = Infallible>; NUM_ROWS] = [
+        &mut pins.gpio26.into_pull_down_input(),
+        &mut pins.gpio25.into_pull_down_input(),
+        &mut pins.gpio27.into_pull_down_input(),
+        &mut pins.gpio28.into_pull_down_input(),
+        &mut pins.gpio15.into_pull_down_input(),
+        &mut pins.gpio24.into_pull_down_input(),
     ];
 
     let mut cols: [&mut dyn OutputPin<Error = Infallible>; NUM_COLS] = [
@@ -143,7 +143,7 @@ fn main() -> ! {
     let mut debounce: Debounce<NUM_ROWS, NUM_COLS> = Debounce::new(DEBOUNCE_TICKS, modifier_mask);
 
     // Do an initial scan of the keys so that we immediately have something to report to the host when asked.
-    let scan = KeyScan::scan(rows, &mut cols, &mut delay, &mut debounce);
+    let scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce);
     critical_section::with(|cs| {
         KEYBOARD_REPORT.replace(cs, scan.into());
     });
@@ -189,10 +189,11 @@ fn main() -> ! {
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
     let keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
-        .manufacturer("bschwind")
-        .product("key ripper")
         .supports_remote_wakeup(true)
+        .strings(&[StringDescriptors::default().manufacturer("bschwind").product("key ripper")])
+        .unwrap()
         .build();
+
     unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
         USB_HID = Some(hid_endpoint);
@@ -204,7 +205,7 @@ fn main() -> ! {
     }
     info!("Entering main loop");
     loop {
-        let scan = KeyScan::scan(rows, &mut cols, &mut delay, &mut debounce);
+        let scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce);
         critical_section::with(|cs| {
             KEYBOARD_REPORT.replace(cs, scan.into());
         });
