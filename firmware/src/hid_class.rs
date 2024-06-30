@@ -5,10 +5,30 @@ use usb_device::{
         BosWriter, ControlIn, ControlOut, DescriptorWriter, EndpointAddress, EndpointIn,
         InterfaceNumber, StringIndex, UsbBus, UsbBusAllocator, UsbClass,
     },
+    control::{Request, RequestType},
     LangID, Result,
 };
 
 const USB_CLASS_HID: u8 = 0x03;
+
+const DESCRIPTOR_LEN_BYTES: [u8; 2] = (KEYBOARD_REPORT_DESCRIPTOR.len() as u16).to_le_bytes();
+
+// This is usually prepended with the length (including the byte for the length itself),
+// and the descriptor type, so 2 extra bytes.
+const HID_DESCRIPTOR: [u8; 7] = [
+    0x11, // bcdHID - 1.11 - LSB first
+    0x01, // bcdHID - 1.11 - LSB first
+    0x00, // bCountryCode - 0 = Not supported/specified
+    1,    // bNumDescriptors - Number of HID class descriptors to follow
+    // bDescriptorType
+    //   * 0x21      - HID
+    //   * 0x22      - Report
+    //   * 0x23      - Physical descriptor
+    //   * 0x24-0x2F - Reserved
+    0x22,                    // bDescriptorType - Report
+    DESCRIPTOR_LEN_BYTES[0], // wDescriptorLength - LSB first
+    DESCRIPTOR_LEN_BYTES[1], // wDescriptorLength - LSB first
+];
 
 // A HID device is composed of the following endpoints:
 // * A pair of control IN and OUT endpoints called the default endpoint
@@ -44,6 +64,10 @@ impl<'a, B: UsbBus> HidClass<'a, B> {
 
         Self { usb_interface, in_endpoint, _bus: PhantomData {} }
     }
+
+    pub fn write_raw_report(&self, data: &[u8]) -> Result<usize> {
+        self.in_endpoint.write(data)
+    }
 }
 
 impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
@@ -73,10 +97,6 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
             1, // Keyboard
         )?;
 
-        let descriptor_len = KEYBOARD_REPORT_DESCRIPTOR.len() as u16;
-        let [descriptor_len_lsb, descriptor_len_msb] = descriptor_len.to_le_bytes();
-        // let descriptor_len_lsb =
-
         // Write the HID Descriptor
         writer.write(
             // Descriptor type
@@ -85,20 +105,7 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
             // 0x23      - Physical Descriptor
             // 0x24-0x2F - Reserved
             0x21, // bDescriptorType
-            &[
-                0x11, // bcdHID - 1.11 - LSB first
-                0x01, // bcdHID - 1.11 - LSB first
-                0x00, // bCountryCode - 0 = Not supported/specified
-                1,    // bNumDescriptors - Number of HID class descriptors to follow
-                // bDescriptorType
-                //   * 0x21      - HID
-                //   * 0x22      - Report
-                //   * 0x23      - Physical descriptor
-                //   * 0x24-0x2F - Reserved
-                0x22,               // bDescriptorType - Report
-                descriptor_len_lsb, // wDescriptorLength - LSB first
-                descriptor_len_msb, // wDescriptorLength - LSB first
-            ],
+            &HID_DESCRIPTOR,
         )?;
 
         // Write the descriptor for the IN endpoint
@@ -132,7 +139,45 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
     // * Transmitting data when polled by the HID class driver (using the Get_Report request).
     // * Receiving data from the host.
     fn control_in(&mut self, xfer: ControlIn<B>) {
-        let _ = xfer;
+        let request = xfer.request();
+
+        let interface = request.index;
+        if interface != u8::from(self.usb_interface) as u16 {
+            return;
+        }
+
+        match (request.request_type, request.request) {
+            (RequestType::Standard, Request::GET_DESCRIPTOR) => {
+                let [_descriptor_index, descriptor_type] = request.value.to_le_bytes();
+
+                match descriptor_type {
+                    // HID Descriptor Type
+                    0x21 => {
+                        let buf: [u8; HID_DESCRIPTOR.len() + 2] = [
+                            // Length of buf inclusive of size prefix
+                            HID_DESCRIPTOR.len() as u8 + 2,
+                            0x21, // HID Descriptor type
+                            HID_DESCRIPTOR[0],
+                            HID_DESCRIPTOR[1],
+                            HID_DESCRIPTOR[2],
+                            HID_DESCRIPTOR[3],
+                            HID_DESCRIPTOR[4],
+                            HID_DESCRIPTOR[5],
+                            HID_DESCRIPTOR[6],
+                        ];
+
+                        xfer.accept_with(&buf).ok();
+                    },
+                    // HID Report Descriptor Type
+                    0x22 => {
+                        xfer.accept_with_static(KEYBOARD_REPORT_DESCRIPTOR).ok();
+                    },
+                    _ => {},
+                }
+            },
+            (RequestType::Class, 0x0) => {},
+            _ => {},
+        }
     }
 
     fn endpoint_setup(&mut self, addr: EndpointAddress) {
