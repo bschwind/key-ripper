@@ -5,6 +5,7 @@
 #![no_std]
 
 use crate::key_scan::TRANSPOSED_NORMAL_LAYER_MAPPING;
+use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use usb_device::class::UsbClass;
 mod debounce;
 mod hid_descriptor;
@@ -17,6 +18,7 @@ use critical_section::Mutex;
 use defmt::{error, info, warn};
 use defmt_rtt as _;
 use embedded_hal::digital::{InputPin, OutputPin};
+use fugit::ExtU32;
 use panic_probe as _;
 use rp2040_hal::{
     pac::{self, interrupt},
@@ -131,6 +133,7 @@ fn main() -> ! {
 
     // Initialize a delay for accurate sleeping.
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
+    let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS, &clocks);
 
     let mut modifier_mask = [[false; NUM_ROWS]; NUM_COLS];
     for (col, mapping_col) in modifier_mask.iter_mut().zip(TRANSPOSED_NORMAL_LAYER_MAPPING) {
@@ -204,12 +207,17 @@ fn main() -> ! {
         pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
     }
     info!("Entering main loop");
+
+    let mut tick_count_down = timer.count_down();
+    tick_count_down.start(1.millis());
+
     loop {
-        let scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce);
-        critical_section::with(|cs| {
-            KEYBOARD_REPORT.replace(cs, scan.into());
-        });
-        delay.delay_ms(SCAN_LOOP_RATE_MS);
+        if tick_count_down.wait().is_ok() {
+            let scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce);
+            critical_section::with(|cs| {
+                KEYBOARD_REPORT.replace(cs, scan.into());
+            });
+        }
     }
 }
 
