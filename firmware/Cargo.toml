@@ -15,7 +15,8 @@ panic-reset = "0.1"
 rp2040-boot2 = "0.3"
 rp2040-hal = { version = "0.10", features = ["rt", "critical-section-impl"] }
 usb-device = "0.3"
-usbd-hid = "0.7"
+# usbd-hid = "0.7"
+usbd-hid = { path = "libs/usbd-hid" }
 critical-section = { version = "1" }
 
 # Dependencies for debug probe
