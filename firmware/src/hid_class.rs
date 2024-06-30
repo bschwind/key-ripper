@@ -72,6 +72,16 @@ impl<'a, B: UsbBus> HidClass<'a, B> {
 
 impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
     fn get_configuration_descriptors(&self, writer: &mut DescriptorWriter) -> Result<()> {
+        // When a Get_Descriptor(Configuration) request is issued, it
+        // returns the Configuration descriptor, all Interface descriptors, all Endpoint
+        // descriptors, and the HID descriptor for each interface.
+        // That is, the order shall be:
+        //   * Configuration descriptor (handled by usb-device crate)
+        //   * Interface descriptor (specifying HID Class)
+        //   * HID descriptor (associated with above Interface)
+        //   * Endpoint descriptor (for HID Interrupt In Endpoint)
+        //   * Optional Endpoint descriptor (for HID Interrupt Out Endpoint)
+
         // The bDeviceClass and bDeviceSubClass fields in the Device Descriptor
         // should not be used to identify a device as belonging to the HID class. Instead use
         // the bInterfaceClass and bInterfaceSubClass fields in the Interface descriptor.
@@ -90,6 +100,7 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
         //     2     - Mouse
         //     3-255 - Reserved
 
+        // Write the interface descriptor
         writer.interface(
             self.usb_interface,
             USB_CLASS_HID,
