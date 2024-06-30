@@ -222,6 +222,9 @@ fn main() -> ! {
                     let mut usb_hid = USB_HID.borrow_ref_mut(cs);
                     let usb_hid = usb_hid.as_mut().unwrap();
 
+                    let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
+                    let hid_class = hid_class.as_mut().unwrap();
+
                     if let Err(err) = usb_hid.push_raw_input(&report.as_raw_input()) {
                         match err {
                             UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
@@ -236,6 +239,8 @@ fn main() -> ! {
                             UsbError::InvalidState => error!("UsbError::InvalidState"),
                         }
                     }
+
+                    let _ = hid_class.write_raw_report(&report.as_raw_input());
                 });
 
                 last_report = report;
