@@ -10,6 +10,7 @@ cortex-m = "0.7"
 cortex-m-rt = "0.7"
 embedded-hal = "1"
 embedded-time = "0.12"
+fugit = "0.3"
 panic-reset = "0.1"
 rp2040-boot2 = "0.3"
 rp2040-hal = { version = "0.10", features = ["rt", "critical-section-impl"] }
