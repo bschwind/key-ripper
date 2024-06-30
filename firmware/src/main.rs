@@ -4,7 +4,7 @@
 #![no_main]
 #![no_std]
 
-use crate::key_scan::TRANSPOSED_NORMAL_LAYER_MAPPING;
+use crate::key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING};
 use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use usb_device::class::UsbClass;
 mod debounce;
@@ -26,11 +26,8 @@ use rp2040_hal::{
     Clock, Watchdog,
 };
 use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::*};
-use usbd_hid::{
-    descriptor::KeyboardReport,
-    hid_class::{
-        HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
-    },
+use usbd_hid::hid_class::{
+    HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
 };
 
 use debounce::Debounce;
@@ -233,7 +230,7 @@ unsafe fn USBCTRL_IRQ() {
     }
 
     let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
-    if let Err(err) = usb_hid.push_input(&report) {
+    if let Err(err) = usb_hid.push_raw_input(&report.as_raw_input()) {
         match err {
             UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
             UsbError::ParseError => error!("UsbError::ParseError"),

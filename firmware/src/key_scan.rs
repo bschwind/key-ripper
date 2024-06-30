@@ -6,7 +6,6 @@ use core::{convert::Infallible, ops::Deref};
 
 use cortex_m::delay::Delay;
 use embedded_hal::digital::InputPin;
-use usbd_hid::descriptor::KeyboardReport;
 
 use crate::{debounce::Debounce, key_codes::KeyCode};
 
@@ -46,6 +45,30 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> KeyScan<NUM_ROWS, NUM_COLS> {
 
         let matrix = debounce.report_and_tick(&raw_matrix);
         Self { matrix }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq)]
+pub struct KeyboardReport {
+    pub modifier: u8,
+    pub reserved: u8,
+    pub leds: u8,
+    pub keycodes: [u8; 6],
+}
+
+impl KeyboardReport {
+    pub fn as_raw_input(&self) -> [u8; 8] {
+        [
+            self.modifier,
+            0x0, // Reserved byte
+            // Keycodes
+            self.keycodes[0],
+            self.keycodes[1],
+            self.keycodes[2],
+            self.keycodes[3],
+            self.keycodes[4],
+            self.keycodes[5],
+        ]
     }
 }
 
