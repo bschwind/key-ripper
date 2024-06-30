@@ -4,16 +4,15 @@
 #![no_main]
 #![no_std]
 
-use crate::key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING};
-use cortex_m::prelude::_embedded_hal_timer_CountDown;
-use usb_device::class::UsbClass;
 mod debounce;
 mod hid_descriptor;
 mod key_codes;
 mod key_mapping;
 mod key_scan;
 
+use crate::key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING};
 use core::{cell::RefCell, convert::Infallible};
+use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use critical_section::Mutex;
 use defmt::{error, info, warn};
 use defmt_rtt as _;
@@ -222,30 +221,36 @@ fn main() -> ! {
 #[allow(non_snake_case)]
 #[interrupt]
 unsafe fn USBCTRL_IRQ() {
+    static mut LAST_REPORT: KeyboardReport =
+        KeyboardReport { modifier: 0, reserved: 0, leds: 0, keycodes: [0u8; 6] };
+
     let usb_dev = USB_DEVICE.as_mut().unwrap();
     let usb_hid = USB_HID.as_mut().unwrap();
 
-    if usb_dev.poll(&mut [usb_hid]) {
-        usb_hid.poll();
-    }
-
     let report = critical_section::with(|cs| *KEYBOARD_REPORT.borrow_ref(cs));
-    if let Err(err) = usb_hid.push_raw_input(&report.as_raw_input()) {
-        match err {
-            UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
-            UsbError::ParseError => error!("UsbError::ParseError"),
-            UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
-            UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
-            UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
-            UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
-            UsbError::Unsupported => error!("UsbError::Unsupported"),
-            UsbError::InvalidState => error!("UsbError::InvalidState"),
-        }
-    }
 
-    // macOS doesn't like it when you don't pull this, apparently.
-    // TODO: maybe even parse something here
-    usb_hid.pull_raw_output(&mut [0; 64]).ok();
+    if usb_dev.poll(&mut [usb_hid]) {
+        if report != *LAST_REPORT {
+            if let Err(err) = usb_hid.push_raw_input(&report.as_raw_input()) {
+                match err {
+                    UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
+                    UsbError::ParseError => error!("UsbError::ParseError"),
+                    UsbError::BufferOverflow => error!("UsbError::BufferOverflow"),
+                    UsbError::EndpointOverflow => error!("UsbError::EndpointOverflow"),
+                    UsbError::EndpointMemoryOverflow => error!("UsbError::EndpointMemoryOverflow"),
+                    UsbError::InvalidEndpoint => error!("UsbError::InvalidEndpoint"),
+                    UsbError::Unsupported => error!("UsbError::Unsupported"),
+                    UsbError::InvalidState => error!("UsbError::InvalidState"),
+                }
+            } else {
+                *LAST_REPORT = report;
+            }
+        }
+
+        // macOS doesn't like it when you don't pull this, apparently.
+        // TODO: maybe even parse something here
+        usb_hid.pull_raw_output(&mut [0; 64]).ok();
+    }
 
     // Wake the host if a key is pressed and the device supports
     // remote wakeup.
