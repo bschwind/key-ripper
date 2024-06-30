@@ -5,12 +5,16 @@
 #![no_std]
 
 mod debounce;
+mod hid_class;
 mod hid_descriptor;
 mod key_codes;
 mod key_mapping;
 mod key_scan;
 
-use crate::key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING};
+use crate::{
+    hid_class::HidClass,
+    key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING},
+};
 use core::{cell::RefCell, convert::Infallible};
 use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use critical_section::Mutex;
@@ -24,7 +28,7 @@ use rp2040_hal::{
     usb::{self, UsbBus},
     Clock, Watchdog,
 };
-use usb_device::{bus::UsbBusAllocator, class::UsbClass, device::UsbDeviceBuilder, prelude::*};
+use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::*};
 use usbd_hid::hid_class::{
     HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
 };
@@ -60,6 +64,10 @@ static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 
 /// The USB Human Interface Device Driver (shared with the interrupt).
 static USB_HID: Mutex<RefCell<Option<HIDClass<usb::UsbBus>>>> = Mutex::new(RefCell::new(None));
+
+/// The USB Human Interface Device Driver (shared with the interrupt).
+static USB_HID_CLASS: Mutex<RefCell<Option<HidClass<usb::UsbBus>>>> =
+    Mutex::new(RefCell::new(None));
 
 #[defmt::panic_handler]
 fn panic() -> ! {
@@ -155,7 +163,7 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
     let bus_allocator = UsbBusAllocator::new(usb_bus);
-    let bus_ref = unsafe {
+    let bus_allocator_ref = unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
         USB_BUS = Some(bus_allocator);
         // We are promising to the compiler not to take mutable access to this global
@@ -164,7 +172,7 @@ fn main() -> ! {
     };
 
     let hid_endpoint = HIDClass::new_with_settings(
-        bus_ref,
+        bus_allocator_ref,
         hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
         USB_POLL_RATE_MS,
         HidClassSettings {
@@ -175,8 +183,10 @@ fn main() -> ! {
         },
     );
 
+    let hid_class = HidClass::new(bus_allocator_ref);
+
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
-    let keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
+    let keyboard_usb_device = UsbDeviceBuilder::new(bus_allocator_ref, UsbVidPid(0x16c0, 0x27db))
         .supports_remote_wakeup(true)
         .strings(&[StringDescriptors::default().manufacturer("bschwind").product("key ripper")])
         .unwrap()
@@ -186,6 +196,7 @@ fn main() -> ! {
         // Note (safety): This is safe as interrupts haven't been started yet
         critical_section::with(|cs| {
             USB_HID.replace(cs, Some(hid_endpoint));
+            USB_HID_CLASS.replace(cs, Some(hid_class));
         });
 
         USB_DEVICE = Some(keyboard_usb_device);
@@ -243,9 +254,10 @@ unsafe fn USBCTRL_IRQ() {
         let mut usb_hid = USB_HID.borrow_ref_mut(cs);
         let usb_hid = usb_hid.as_mut().unwrap();
 
-        if usb_dev.poll(&mut [usb_hid]) {
-            usb_hid.poll();
-        }
+        let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
+        let hid_class = hid_class.as_mut().unwrap();
+
+        usb_dev.poll(&mut [usb_hid, hid_class]);
 
         // macOS doesn't like it when you don't pull this, apparently.
         // TODO: maybe even parse something here
