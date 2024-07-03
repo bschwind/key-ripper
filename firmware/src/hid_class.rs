@@ -59,7 +59,9 @@ impl<'a, B: UsbBus> HidClass<'a, B> {
         let usb_interface = bus_allocator.interface();
 
         let max_packet_size = 8;
-        let poll_interval = 1; // Poll every 1 ms.
+
+        // Poll every 1 ms. Device must be in USB Full-Speed for this to work, along with USB 1.1 or greater.
+        let poll_interval = 1;
         let in_endpoint = bus_allocator.interrupt(max_packet_size, poll_interval);
 
         Self { usb_interface, in_endpoint, _bus: PhantomData {} }

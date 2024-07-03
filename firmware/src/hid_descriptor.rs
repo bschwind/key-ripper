@@ -1,3 +1,7 @@
+// TODO(bschwind) - Implement NKRO:
+//                  https://www.devever.net/~hl/usbnkro
+//                  https://static.wongcornall.com/ibm-capsense-usb-web/ibm-capsense-usb.html#x1-160003.3.2
+
 #[rustfmt::skip]
 pub const KEYBOARD_REPORT_DESCRIPTOR: &[u8] = &[
     0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
