@@ -213,10 +213,11 @@ fn main() -> ! {
                             UsbError::Unsupported => error!("UsbError::Unsupported"),
                             UsbError::InvalidState => error!("UsbError::InvalidState"),
                         }
+                    } else {
+                        // Only assign to last_report if it was successfully reported.
+                        last_report = report;
                     }
                 });
-
-                last_report = report;
             }
         }
     }
