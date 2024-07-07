@@ -4,6 +4,7 @@
 #![no_main]
 #![no_std]
 
+use usbd_serial::embedded_io::Write;
 mod debounce;
 mod hid_class;
 mod hid_descriptor;
@@ -31,6 +32,7 @@ use rp2040_hal::{
     Clock, Watchdog,
 };
 use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::*};
+use usbd_serial::SerialPort;
 
 /// The rate of polling of the keyboard itself in firmware.
 const SCAN_LOOP_RATE_MS: u32 = 1;
@@ -58,6 +60,9 @@ static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 
 /// The USB Human Interface Device Driver (shared with the interrupt).
 static USB_HID_CLASS: Mutex<RefCell<Option<HidClass<usb::UsbBus>>>> =
+    Mutex::new(RefCell::new(None));
+
+static USB_SERIAL_CLASS: Mutex<RefCell<Option<SerialPort<usb::UsbBus>>>> =
     Mutex::new(RefCell::new(None));
 
 #[defmt::panic_handler]
@@ -162,7 +167,10 @@ fn main() -> ! {
         USB_BUS.as_ref().unwrap()
     };
 
-    let hid_class = HidClass::new(bus_allocator_ref);
+    let hid_timer = timer;
+    let hid_class = HidClass::new(bus_allocator_ref, hid_timer);
+
+    let serial = SerialPort::new(bus_allocator_ref);
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
     let keyboard_usb_device = UsbDeviceBuilder::new(bus_allocator_ref, UsbVidPid(0x16c0, 0x27db))
@@ -175,6 +183,7 @@ fn main() -> ! {
         // Note (safety): This is safe as interrupts haven't been started yet
         critical_section::with(|cs| {
             USB_HID_CLASS.replace(cs, Some(hid_class));
+            USB_SERIAL_CLASS.replace(cs, Some(serial));
         });
 
         USB_DEVICE = Some(keyboard_usb_device);
@@ -191,14 +200,42 @@ fn main() -> ! {
     let mut last_report: KeyboardReport = scan.into();
 
     loop {
+        // let last_ep_in_complete = critical_section::with(|cs| {
+        //     let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
+        //     let hid_class = hid_class.as_mut().unwrap();
+        //     hid_class.last_ep_in_complete()
+        // });
+
+        // if let Some(last_ep_in_complete) = last_ep_in_complete {
+        //     // Delay
+        //     let time_since_ep = timer.get_counter() - last_ep_in_complete;
+
+        //     let sleep_time_us = 1000u32
+        //         .saturating_sub(time_since_ep.to_micros() as u32)
+        //         .saturating_sub(100); // Rough time it takes to scan
+
+        //     delay.delay_us(sleep_time_us);
+        // }
+
         if tick_count_down.wait().is_ok() {
-            let scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce);
-            let report: KeyboardReport = scan.into();
+            let scan = KeyScan::scan(&mut rows, &mut cols, &mut delay, &mut debounce); // Takes about 80µs
+            let report: KeyboardReport = scan.into(); // Takes about 20µs
 
             if report != last_report {
                 critical_section::with(|cs| {
                     let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
                     let hid_class = hid_class.as_mut().unwrap();
+
+                    if let Some(interval) = hid_class.estimated_poll_interval() {
+                        let mut serial = USB_SERIAL_CLASS.borrow_ref_mut(cs);
+                        let serial = serial.as_mut().unwrap();
+
+                        // let poll_interval = interval.to_micros();
+
+                        let _ = writeln!(serial, "{interval:?}");
+                        // TODO(bschwind) - Log the micros to serial so we can see what we're
+                        //                  working with.
+                    }
 
                     if let Err(err) = hid_class.write_raw_report(&report.as_raw_input()) {
                         match err {
@@ -232,6 +269,9 @@ unsafe fn USBCTRL_IRQ() {
         let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
         let hid_class = hid_class.as_mut().unwrap();
 
-        usb_dev.poll(&mut [hid_class]);
+        let mut serial = USB_SERIAL_CLASS.borrow_ref_mut(cs);
+        let serial = serial.as_mut().unwrap();
+
+        usb_dev.poll(&mut [hid_class, serial]);
     });
 }

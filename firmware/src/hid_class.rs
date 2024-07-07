@@ -1,5 +1,7 @@
 use crate::hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR;
 use core::marker::PhantomData;
+use fugit::Duration;
+use rp2040_hal::{timer::Instant, Timer};
 use usb_device::{
     class_prelude::{
         BosWriter, ControlIn, ControlOut, DescriptorWriter, EndpointAddress, EndpointIn,
@@ -52,10 +54,14 @@ pub struct HidClass<'a, B: UsbBus> {
     // if declared.
     // out_endpoint: EndpointOut<'a, B>,
     _bus: PhantomData<B>,
+
+    last_endpoint_in_complete: Option<Instant>,
+    timer: Timer,
+    estimated_poll_interval: Option<Duration<u64, 1, 1_000_000>>,
 }
 
 impl<'a, B: UsbBus> HidClass<'a, B> {
-    pub fn new(bus_allocator: &'a UsbBusAllocator<B>) -> Self {
+    pub fn new(bus_allocator: &'a UsbBusAllocator<B>, timer: Timer) -> Self {
         let usb_interface = bus_allocator.interface();
 
         let max_packet_size = 8;
@@ -64,11 +70,27 @@ impl<'a, B: UsbBus> HidClass<'a, B> {
         let poll_interval = 1;
         let in_endpoint = bus_allocator.interrupt(max_packet_size, poll_interval);
 
-        Self { usb_interface, in_endpoint, _bus: PhantomData {} }
+        Self {
+            usb_interface,
+            in_endpoint,
+            _bus: PhantomData {},
+            last_endpoint_in_complete: None,
+            timer,
+            estimated_poll_interval: None,
+        }
     }
 
     pub fn write_raw_report(&self, data: &[u8]) -> Result<usize> {
         self.in_endpoint.write(data)
+    }
+
+    pub fn estimated_poll_interval(&self) -> Option<Duration<u64, 1, 1_000_000>> {
+        self.estimated_poll_interval
+    }
+
+    #[allow(unused)]
+    pub fn last_ep_in_complete(&self) -> Option<Instant> {
+        self.last_endpoint_in_complete
     }
 }
 
@@ -201,8 +223,14 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
         let _ = addr;
     }
 
-    fn endpoint_in_complete(&mut self, addr: EndpointAddress) {
-        let _ = addr;
+    fn endpoint_in_complete(&mut self, _addr: EndpointAddress) {
+        let now = self.timer.get_counter();
+
+        if let Some(last_ep_in) = self.last_endpoint_in_complete {
+            self.estimated_poll_interval = Some(now - last_ep_in);
+        }
+
+        self.last_endpoint_in_complete = Some(now);
     }
 
     fn get_alt_setting(&mut self, interface: InterfaceNumber) -> Option<u8> {
