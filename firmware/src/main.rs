@@ -5,37 +5,35 @@
 #![no_std]
 
 mod debounce;
+mod hid_class;
 mod hid_descriptor;
 mod key_codes;
 mod key_mapping;
 mod key_scan;
 
-use crate::key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING};
+use crate::{
+    hid_class::HidClass,
+    key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING},
+};
 use core::{cell::RefCell, convert::Infallible};
 use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use critical_section::Mutex;
+use debounce::Debounce;
 use defmt::{error, info, warn};
 use defmt_rtt as _;
 use embedded_hal::digital::{InputPin, OutputPin};
 use fugit::ExtU32;
+use key_scan::KeyScan;
 use panic_probe as _;
 use rp2040_hal::{
     pac::{self, interrupt},
     usb::{self, UsbBus},
     Clock, Watchdog,
 };
-use usb_device::{bus::UsbBusAllocator, class::UsbClass, device::UsbDeviceBuilder, prelude::*};
-use usbd_hid::hid_class::{
-    HIDClass, HidClassSettings, HidCountryCode, HidProtocol, HidSubClass, ProtocolModeConfig,
-};
-
-use debounce::Debounce;
-use key_scan::KeyScan;
+use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::*};
 
 /// The rate of polling of the keyboard itself in firmware.
 const SCAN_LOOP_RATE_MS: u32 = 1;
-/// The rate of USB interrupt polling the device will ask of the host.
-const USB_POLL_RATE_MS: u8 = SCAN_LOOP_RATE_MS as u8;
 /// The number of milliseconds to wait until a "key-off-then-key-on" in quick succession is allowed.
 const DEBOUNCE_MS: u8 = 6;
 
@@ -59,7 +57,8 @@ static mut USB_DEVICE: Option<UsbDevice<usb::UsbBus>> = None;
 static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 
 /// The USB Human Interface Device Driver (shared with the interrupt).
-static USB_HID: Mutex<RefCell<Option<HIDClass<usb::UsbBus>>>> = Mutex::new(RefCell::new(None));
+static USB_HID_CLASS: Mutex<RefCell<Option<HidClass<usb::UsbBus>>>> =
+    Mutex::new(RefCell::new(None));
 
 #[defmt::panic_handler]
 fn panic() -> ! {
@@ -155,7 +154,7 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
     let bus_allocator = UsbBusAllocator::new(usb_bus);
-    let bus_ref = unsafe {
+    let bus_allocator_ref = unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
         USB_BUS = Some(bus_allocator);
         // We are promising to the compiler not to take mutable access to this global
@@ -163,20 +162,10 @@ fn main() -> ! {
         USB_BUS.as_ref().unwrap()
     };
 
-    let hid_endpoint = HIDClass::new_with_settings(
-        bus_ref,
-        hid_descriptor::KEYBOARD_REPORT_DESCRIPTOR,
-        USB_POLL_RATE_MS,
-        HidClassSettings {
-            subclass: HidSubClass::NoSubClass,
-            protocol: HidProtocol::Keyboard,
-            config: ProtocolModeConfig::ForceReport,
-            locale: HidCountryCode::US,
-        },
-    );
+    let hid_class = HidClass::new(bus_allocator_ref);
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
-    let keyboard_usb_device = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27db))
+    let keyboard_usb_device = UsbDeviceBuilder::new(bus_allocator_ref, UsbVidPid(0x16c0, 0x27db))
         .supports_remote_wakeup(true)
         .strings(&[StringDescriptors::default().manufacturer("bschwind").product("key ripper")])
         .unwrap()
@@ -185,7 +174,7 @@ fn main() -> ! {
     unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
         critical_section::with(|cs| {
-            USB_HID.replace(cs, Some(hid_endpoint));
+            USB_HID_CLASS.replace(cs, Some(hid_class));
         });
 
         USB_DEVICE = Some(keyboard_usb_device);
@@ -208,10 +197,10 @@ fn main() -> ! {
 
             if report != last_report {
                 critical_section::with(|cs| {
-                    let mut usb_hid = USB_HID.borrow_ref_mut(cs);
-                    let usb_hid = usb_hid.as_mut().unwrap();
+                    let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
+                    let hid_class = hid_class.as_mut().unwrap();
 
-                    if let Err(err) = usb_hid.push_raw_input(&report.as_raw_input()) {
+                    if let Err(err) = hid_class.write_raw_report(&report.as_raw_input()) {
                         match err {
                             UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
                             UsbError::ParseError => error!("UsbError::ParseError"),
@@ -224,10 +213,11 @@ fn main() -> ! {
                             UsbError::Unsupported => error!("UsbError::Unsupported"),
                             UsbError::InvalidState => error!("UsbError::InvalidState"),
                         }
+                    } else {
+                        // Only assign to last_report if it was successfully reported.
+                        last_report = report;
                     }
                 });
-
-                last_report = report;
             }
         }
     }
@@ -240,15 +230,9 @@ unsafe fn USBCTRL_IRQ() {
     let usb_dev = USB_DEVICE.as_mut().unwrap();
 
     critical_section::with(|cs| {
-        let mut usb_hid = USB_HID.borrow_ref_mut(cs);
-        let usb_hid = usb_hid.as_mut().unwrap();
+        let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
+        let hid_class = hid_class.as_mut().unwrap();
 
-        if usb_dev.poll(&mut [usb_hid]) {
-            usb_hid.poll();
-        }
-
-        // macOS doesn't like it when you don't pull this, apparently.
-        // TODO: maybe even parse something here
-        usb_hid.pull_raw_output(&mut [0; 64]).ok();
+        usb_dev.poll(&mut [hid_class]);
     });
 }

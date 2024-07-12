@@ -33,14 +33,13 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> KeyScan<NUM_ROWS, NUM_COLS> {
 
         for (gpio_col, matrix_col) in columns.iter_mut().zip(raw_matrix.iter_mut()) {
             gpio_col.set_high().unwrap();
-            delay.delay_us(10);
+            delay.delay_us(1);
 
             for (gpio_row, matrix_row) in rows.iter_mut().zip(matrix_col.iter_mut()) {
                 *matrix_row = gpio_row.is_high().unwrap();
             }
 
             gpio_col.set_low().unwrap();
-            delay.delay_us(10);
         }
 
         let matrix = debounce.report_and_tick(&raw_matrix);
