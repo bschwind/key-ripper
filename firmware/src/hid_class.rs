@@ -52,6 +52,8 @@ pub struct HidClass<'a, B: UsbBus> {
     // if declared.
     // out_endpoint: EndpointOut<'a, B>,
     _bus: PhantomData<B>,
+
+    last_report: [u8; 8],
 }
 
 impl<'a, B: UsbBus> HidClass<'a, B> {
@@ -64,11 +66,14 @@ impl<'a, B: UsbBus> HidClass<'a, B> {
         let poll_interval = 1;
         let in_endpoint = bus_allocator.interrupt(max_packet_size, poll_interval);
 
-        Self { usb_interface, in_endpoint, _bus: PhantomData {} }
+        let last_report = [0; 8];
+
+        Self { usb_interface, in_endpoint, _bus: PhantomData {}, last_report }
     }
 
-    pub fn write_raw_report(&self, data: &[u8]) -> Result<usize> {
-        self.in_endpoint.write(data)
+    pub fn write_raw_report(&mut self, data: [u8; 8]) -> Result<usize> {
+        self.last_report = data;
+        self.in_endpoint.write(&data)
     }
 }
 
@@ -152,6 +157,13 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
     // * Transmitting data when polled by the HID class driver (using the Get_Report request).
     // * Receiving data from the host.
     fn control_in(&mut self, xfer: ControlIn<B>) {
+        const GET_REPORT_REQUEST: u8 = 0x01;
+        // const GET_IDLE_REQUEST: u8 = 0x02;
+        // const GET_PROTOCOL_REQUEST: u8 = 0x03;
+        // const SET_REPORT_REQUEST: u8 = 0x09;
+        // const SET_IDLE_REQUEST: u8 = 0x0A;
+        // const SET_PROTOCOL_REQUEST: u8 = 0x0B;
+
         let request = xfer.request();
 
         let interface = request.index;
@@ -188,7 +200,17 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
                     _ => {},
                 }
             },
-            (RequestType::Class, 0x0) => {},
+            (RequestType::Class, GET_REPORT_REQUEST) => {
+                const REPORT_TYPE_INPUT: u8 = 0x01;
+                // const REPORT_TYPE_OUTPUT: u8 = 0x02;
+                // const REPORT_TYPE_FEATURE: u8 = 0x03;
+
+                let [_report_id, report_type] = request.value.to_le_bytes();
+
+                if report_type == REPORT_TYPE_INPUT {
+                    xfer.accept_with(&self.last_report).ok();
+                }
+            },
             _ => {},
         }
     }

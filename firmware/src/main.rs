@@ -200,7 +200,7 @@ fn main() -> ! {
                     let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
                     let hid_class = hid_class.as_mut().unwrap();
 
-                    if let Err(err) = hid_class.write_raw_report(&report.as_raw_input()) {
+                    if let Err(err) = hid_class.write_raw_report(report.as_raw_input()) {
                         match err {
                             UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
                             UsbError::ParseError => error!("UsbError::ParseError"),
