@@ -30,6 +30,27 @@ const HID_DESCRIPTOR: [u8; 7] = [
     DESCRIPTOR_LEN_BYTES[1], // wDescriptorLength - LSB first
 ];
 
+#[derive(Default, Copy, Clone)]
+pub struct LedState {
+    num_lock: bool,
+    caps_lock: bool,
+    scroll_lock: bool,
+    compose: bool,
+    kana: bool,
+}
+
+impl From<u8> for LedState {
+    fn from(byte: u8) -> Self {
+        Self {
+            num_lock: byte & 1 == 1,
+            caps_lock: (byte >> 1) & 1 == 1,
+            scroll_lock: (byte >> 2) & 1 == 1,
+            compose: (byte >> 3) & 1 == 1,
+            kana: (byte >> 4) & 1 == 1,
+        }
+    }
+}
+
 // A HID device is composed of the following endpoints:
 // * A pair of control IN and OUT endpoints called the default endpoint
 //   (these are handled by usb-device?)
@@ -54,6 +75,7 @@ pub struct HidClass<'a, B: UsbBus> {
     _bus: PhantomData<B>,
 
     last_report: [u8; 8],
+    led_state: LedState,
 }
 
 impl<'a, B: UsbBus> HidClass<'a, B> {
@@ -68,12 +90,22 @@ impl<'a, B: UsbBus> HidClass<'a, B> {
 
         let last_report = [0; 8];
 
-        Self { usb_interface, in_endpoint, _bus: PhantomData {}, last_report }
+        Self {
+            usb_interface,
+            in_endpoint,
+            _bus: PhantomData {},
+            last_report,
+            led_state: LedState::default(),
+        }
     }
 
     pub fn write_raw_report(&mut self, data: [u8; 8]) -> Result<usize> {
         self.last_report = data;
         self.in_endpoint.write(&data)
+    }
+
+    pub fn led_state(&self) -> LedState {
+        self.led_state
     }
 }
 
@@ -149,7 +181,23 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
     fn poll(&mut self) {}
 
     fn control_out(&mut self, xfer: ControlOut<B>) {
-        let _ = xfer;
+        const SET_REPORT_REQUEST: u8 = 0x09;
+
+        let request = xfer.request();
+
+        let interface = request.index;
+        if interface != u8::from(self.usb_interface) as u16 {
+            return;
+        }
+
+        if request.request == SET_REPORT_REQUEST {
+            if request.length > 0 {
+                self.led_state = LedState::from(xfer.data()[0]);
+                xfer.accept().ok();
+            } else {
+                xfer.reject().ok();
+            }
+        }
     }
 
     // The Control pipe is used for:
