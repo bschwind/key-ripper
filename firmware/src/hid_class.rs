@@ -30,7 +30,7 @@ const HID_DESCRIPTOR: [u8; 7] = [
     DESCRIPTOR_LEN_BYTES[1], // wDescriptorLength - LSB first
 ];
 
-#[derive(Default, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct LedState {
     num_lock: bool,
     caps_lock: bool,
@@ -191,12 +191,14 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
         }
 
         if request.request == SET_REPORT_REQUEST {
-            if request.length > 0 {
+            let data_len = xfer.data().len();
+
+            if data_len > 0 {
+                // The keyboard OUT report is 1 byte for the LED state.
                 self.led_state = LedState::from(xfer.data()[0]);
-                xfer.accept().ok();
-            } else {
-                xfer.reject().ok();
             }
+
+            xfer.accept().ok();
         }
     }
 
