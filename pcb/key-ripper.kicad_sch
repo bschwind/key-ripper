@@ -4113,6 +4113,149 @@
 				)
 			)
 		)
+		(symbol "usb_2_esd_protection:SELC143T5V2UA"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "SELC143T5V2UA"
+				(at 13.716 3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-143"
+				(at -30.226 -16.51 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://datasheet.lcsc.com/lcsc/2208171800_ElecSuper-SELC143T5V2UA_C5126823.pdf"
+				(at 5.08 17.526 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "ESD Protection for USB 2.0"
+				(at -26.924 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "LCSC" "C5126823"
+				(at 12.7 -5.588 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SELC143T5V2UA_0_1"
+				(rectangle
+					(start -5.08 3.81)
+					(end 5.08 -3.81)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "SELC143T5V2UA_1_1"
+				(pin power_in line
+					(at -3.81 -6.35 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 -6.35 90)
+					(length 2.54)
+					(name "I/O"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 6.35 270)
+					(length 2.54)
+					(name "I/O"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -3.81 6.35 270)
+					(length 2.54)
+					(name "V"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "w25q16jvuxiq:W25Q16JVUXIQ"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -5700,6 +5843,16 @@
 		)
 		(uuid "0de1fa0c-edcf-4518-b8e0-27c4a8a315be")
 	)
+	(polyline
+		(pts
+			(xy 236.22 166.37) (xy 191.77 166.37)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0e7d051d-a44a-4a24-9449-4ca4f368acf0")
+	)
 	(wire
 		(pts
 			(xy 194.31 92.71) (xy 209.55 92.71)
@@ -5759,6 +5912,16 @@
 			(type default)
 		)
 		(uuid "138e1eb9-c1bf-4bb7-bccc-b44b95621ca7")
+	)
+	(polyline
+		(pts
+			(xy 236.22 146.05) (xy 236.22 166.37)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1392be79-138d-478b-a010-3b71377dd94f")
 	)
 	(wire
 		(pts
@@ -5820,6 +5983,16 @@
 		)
 		(uuid "15ffb805-9fc0-479b-a40a-abff7bce0742")
 	)
+	(polyline
+		(pts
+			(xy 208.28 146.05) (xy 236.22 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "16c01897-9fe1-4175-b1ea-9debdc27d529")
+	)
 	(wire
 		(pts
 			(xy 133.35 131.445) (xy 141.605 131.445)
@@ -5839,6 +6012,16 @@
 			(type default)
 		)
 		(uuid "17f6be2c-009d-46e0-9b84-f980507dbf5a")
+	)
+	(polyline
+		(pts
+			(xy 191.77 166.37) (xy 191.77 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "189ca18c-439f-40ba-97e0-1b3e9ce367c7")
 	)
 	(wire
 		(pts
@@ -5869,6 +6052,16 @@
 			(type default)
 		)
 		(uuid "1aef8daf-5761-4cdf-8593-f5be114e18dd")
+	)
+	(wire
+		(pts
+			(xy 209.55 162.56) (xy 209.55 163.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1b5d274d-4e1e-406a-b47e-ad92ef038c7a")
 	)
 	(wire
 		(pts
@@ -6329,6 +6522,16 @@
 			(type default)
 		)
 		(uuid "44633d46-8d75-44ea-bbc2-6e00d3adbcef")
+	)
+	(wire
+		(pts
+			(xy 209.55 148.59) (xy 209.55 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "44c2fd03-93b9-4d01-96db-141c507321fa")
 	)
 	(polyline
 		(pts
@@ -6830,6 +7033,16 @@
 		)
 		(uuid "63bc6a2d-254a-4a3b-a312-5926d1249412")
 	)
+	(polyline
+		(pts
+			(xy 191.77 146.05) (xy 208.28 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "63bf9a46-c723-4c67-bafd-b58ff24f3bbc")
+	)
 	(wire
 		(pts
 			(xy 115.57 130.81) (xy 120.015 130.81)
@@ -7199,6 +7412,16 @@
 			(type default)
 		)
 		(uuid "7ff55a7b-a452-4b95-9c1d-9371607f93a7")
+	)
+	(wire
+		(pts
+			(xy 201.93 148.59) (xy 201.93 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "800f88a6-eba0-4c64-8e04-e6e765572bf4")
 	)
 	(wire
 		(pts
@@ -8893,6 +9116,17 @@
 		)
 		(uuid "2c586290-3187-4fbf-a28d-e8b3cab98ec1")
 	)
+	(text "ESD Protection"
+		(exclude_from_sim no)
+		(at 220.98 164.846 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "3990bd4e-dabf-40e4-a007-c02e94152a25")
+	)
 	(text "1uF caps near VREG_IN and VREG_OUT"
 		(exclude_from_sim no)
 		(at -109.22 22.225 0)
@@ -9300,6 +9534,28 @@
 			)
 		)
 	)
+	(global_label "VBUS"
+		(shape input)
+		(at 201.93 148.59 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1b6c30b3-2430-4def-834f-3fa8431025db")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 194.0462 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "USB-"
 		(shape input)
 		(at 44.45 135.89 0)
@@ -9687,6 +9943,28 @@
 		(uuid "5bbead4f-baf0-4e1e-9d65-6c48cebcb6de")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at -15.4879 94.0594 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "USB-"
+		(shape input)
+		(at 209.55 163.83 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "5e6afdd2-7226-4f5b-884f-694d0e822f45")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 217.3455 163.7506 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10391,6 +10669,28 @@
 		(uuid "a733386b-29b1-4a5a-99b7-70d3eb925e91")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 182.8741 127.7144 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "USB+"
+		(shape input)
+		(at 209.55 148.59 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "abbcac19-c572-4398-b191-b4609d1fdc82")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 217.3455 148.5106 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15458,6 +15758,91 @@
 		)
 	)
 	(symbol
+		(lib_id "usb_2_esd_protection:SELC143T5V2UA")
+		(at 205.74 156.21 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4229e581-fc96-404d-8cc6-757fdf0152da")
+		(property "Reference" "D79"
+			(at 212.09 153.6699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SELC143T5V2UA"
+			(at 212.09 156.2099 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-143"
+			(at 175.514 172.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://datasheet.lcsc.com/lcsc/2208171800_ElecSuper-SELC143T5V2UA_C5126823.pdf"
+			(at 210.82 138.684 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "ESD Protection for USB 2.0"
+			(at 178.816 156.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C5126823"
+			(at 212.09 158.7499 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "2"
+			(uuid "78fdcb90-ea70-400c-8e8c-f11e34d3b2c6")
+		)
+		(pin "3"
+			(uuid "e9192bf1-482b-488e-90ff-b1153456b427")
+		)
+		(pin "1"
+			(uuid "244391f1-9eb7-433b-9182-e606b8587240")
+		)
+		(pin "4"
+			(uuid "3b49dd6b-d30c-4264-a1e9-45c26c1fcd56")
+		)
+		(instances
+			(project ""
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "D79")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:C_Small")
 		(at 100.33 176.53 0)
 		(unit 1)
@@ -18399,6 +18784,71 @@
 			(project "key-ripper"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "D33")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 201.93 162.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "6c3ffff5-7741-442f-bcae-b3f46c270a85")
+		(property "Reference" "#PWR031"
+			(at 201.93 168.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 198.12 163.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 201.93 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 201.93 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 201.93 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "fbe20ee7-ad51-45ab-9ae5-546c004d46a7")
+		)
+		(instances
+			(project "key-ripper"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR031")
 					(unit 1)
 				)
 			)

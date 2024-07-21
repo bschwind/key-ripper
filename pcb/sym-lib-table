@@ -1,7 +1,9 @@
 (sym_lib_table
+  (version 7)
   (lib (name "tactile-switch")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-parts/symbols/tactile-switch.kicad_sym")(options "")(descr ""))
   (lib (name "simple-usb-c")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-parts/symbols/simple-usb-c.kicad_sym")(options "")(descr ""))
   (lib (name "rp2040")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-parts/symbols/rp2040.kicad_sym")(options "")(descr ""))
   (lib (name "trrs-connector-pj320a")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-parts/symbols/trrs-connector-pj320a.kicad_sym")(options "")(descr ""))
   (lib (name "w25q16jvuxiq")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-parts/symbols/w25q16jvuxiq.kicad_sym")(options "")(descr ""))
+  (lib (name "usb_2_esd_protection")(type "KiCad")(uri "${KIPRJMOD}/extra-parts/kicad-parts/symbols/usb_2_esd_protection.kicad_sym")(options "")(descr ""))
 )
