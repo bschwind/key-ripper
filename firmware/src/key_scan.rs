@@ -83,6 +83,10 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> From<KeyScan<NUM_ROWS, NUM_CO
             if keycode_index < keycodes.len() {
                 keycodes[keycode_index] = key;
                 keycode_index += 1;
+            } else {
+                for keycode in &mut keycodes {
+                    *keycode = KeyCode::ErrorRollOver as u8;
+                }
             }
         };
 
