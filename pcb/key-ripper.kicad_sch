@@ -28501,7 +28501,7 @@
 				)
 			)
 		)
-		(property "Value" "Power LED (Blue)"
+		(property "Value" "Power LED (Green)"
 			(at 69.85 175.895 0)
 			(effects
 				(font
