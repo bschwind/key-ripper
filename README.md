@@ -2,6 +2,11 @@
 
 A keyboard personalized for myself, designed in KiCad, with custom firmware written in Rust.
 
+![key-ripper](https://github.com/user-attachments/assets/ba4140b2-fec3-4083-b308-aad899887331)
+![feet](https://github.com/user-attachments/assets/78384776-8d7e-42a3-b9e4-88de4bbfe788)
+![macbook-keyboard](https://github.com/user-attachments/assets/e06ab6d2-830b-4dc9-9492-fdda7a4610b0)
+![usb-c](https://github.com/user-attachments/assets/a858e3f2-c250-40af-a0dd-20148ce827b8)
+
 The story behind this board can be found in [this reddit post](https://www.reddit.com/r/MechanicalKeyboards/comments/vtlujd/i_built_a_keyboard_pcb_and_wrote_firmware_for_it/).
 
 I also gave a (time-constrained) talk on making this keyboard which you can view [here](https://www.youtube.com/watch?v=x7LQevYn7d0).
@@ -20,7 +25,18 @@ Sadly I didn't get to cover everything I wanted to talk about when it comes to e
 * Easy to assemble - this will apply once I design a case for it
 * Firmware written in Rust, debuggable with knurling-rs
 
-## Current Version (v0.3)
+## Current Version (v0.3.1)
+
+[v0.3.1 PCBWay Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.3.1)
+
+Version v0.3.1 adds an ESD protector on the USB connector, and was kindly sponsored and manufactured by PCBWay.
+
+![pcbway-matte-black-rp2040](https://github.com/user-attachments/assets/45f30e6b-88ba-49b9-90b5-f04b87f8592b)
+
+![pcbway-matte-black-usb-c](https://github.com/user-attachments/assets/54419f86-dc85-48d1-8f8a-79268ae9ea6c)
+
+
+## v0.3
 
 [v0.3 JLCPCB Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.3)
 
