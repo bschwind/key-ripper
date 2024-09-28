@@ -25,6 +25,11 @@ Sadly I didn't get to cover everything I wanted to talk about when it comes to e
 * Easy to assemble - this will apply once I design a case for it
 * Firmware written in Rust, debuggable with knurling-rs
 
+## Setup
+
+* Order a PCB with the production files from the [latest release](https://github.com/bschwind/key-ripper/releases).
+* When you receive the board, plug it in via USB C and follow [the instruction to flash the firmware](https://github.com/bschwind/key-ripper/blob/main/firmware/README.md).
+
 ## Current Version (v0.3.1)
 
 [v0.3.1 PCBWay Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.3.1)
