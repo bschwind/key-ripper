@@ -31,6 +31,7 @@ use rp2040_hal::{
     Clock, Watchdog,
 };
 use usb_device::{bus::UsbBusAllocator, device::UsbDeviceBuilder, prelude::*};
+use usbd_serial::{embedded_io::Write, SerialPort};
 
 /// The rate of polling of the keyboard itself in firmware.
 const SCAN_LOOP_RATE_MS: u32 = 1;
@@ -58,6 +59,9 @@ static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 
 /// The USB Human Interface Device Driver (shared with the interrupt).
 static USB_HID_CLASS: Mutex<RefCell<Option<HidClass<usb::UsbBus>>>> =
+    Mutex::new(RefCell::new(None));
+
+static USB_SERIAL_CLASS: Mutex<RefCell<Option<SerialPort<usb::UsbBus>>>> =
     Mutex::new(RefCell::new(None));
 
 #[defmt::panic_handler]
@@ -163,6 +167,7 @@ fn main() -> ! {
     };
 
     let hid_class = HidClass::new(bus_allocator_ref);
+    let serial = SerialPort::new(bus_allocator_ref);
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
     let keyboard_usb_device = UsbDeviceBuilder::new(bus_allocator_ref, UsbVidPid(0x16c0, 0x27db))
@@ -175,6 +180,7 @@ fn main() -> ! {
         // Note (safety): This is safe as interrupts haven't been started yet
         critical_section::with(|cs| {
             USB_HID_CLASS.replace(cs, Some(hid_class));
+            USB_SERIAL_CLASS.replace(cs, Some(serial));
         });
 
         USB_DEVICE = Some(keyboard_usb_device);
@@ -188,6 +194,9 @@ fn main() -> ! {
     let mut tick_count_down = timer.count_down();
     tick_count_down.start(1.millis());
 
+    let mut print_led_state_count_down = timer.count_down();
+    print_led_state_count_down.start(1.secs());
+
     let mut last_report: KeyboardReport = scan.into();
 
     loop {
@@ -200,7 +209,7 @@ fn main() -> ! {
                     let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
                     let hid_class = hid_class.as_mut().unwrap();
 
-                    if let Err(err) = hid_class.write_raw_report(&report.as_raw_input()) {
+                    if let Err(err) = hid_class.write_raw_report(report.as_raw_input()) {
                         match err {
                             UsbError::WouldBlock => warn!("UsbError::WouldBlock"),
                             UsbError::ParseError => error!("UsbError::ParseError"),
@@ -220,6 +229,20 @@ fn main() -> ! {
                 });
             }
         }
+
+        if print_led_state_count_down.wait().is_ok() {
+            critical_section::with(|cs| {
+                let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
+                let hid_class = hid_class.as_mut().unwrap();
+
+                let mut serial = USB_SERIAL_CLASS.borrow_ref_mut(cs);
+                let serial = serial.as_mut().unwrap();
+
+                let led_state = hid_class.led_state();
+
+                let _ = writeln!(serial, "{led_state:?}");
+            });
+        }
     }
 }
 
@@ -233,6 +256,9 @@ unsafe fn USBCTRL_IRQ() {
         let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
         let hid_class = hid_class.as_mut().unwrap();
 
-        usb_dev.poll(&mut [hid_class]);
+        let mut serial = USB_SERIAL_CLASS.borrow_ref_mut(cs);
+        let serial = serial.as_mut().unwrap();
+
+        usb_dev.poll(&mut [hid_class, serial]);
     });
 }

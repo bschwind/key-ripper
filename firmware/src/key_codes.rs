@@ -5,6 +5,7 @@ use defmt::Format;
 #[derive(Copy, Clone, Format, PartialEq)]
 pub enum KeyCode {
     Empty = 0x0,
+    ErrorRollOver = 0x01,
     A = 0x04,
     B = 0x05,
     C = 0x06,
