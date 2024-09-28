@@ -40,7 +40,6 @@ Version v0.3.1 adds an ESD protector on the USB connector, and was kindly sponso
 
 ![pcbway-matte-black-usb-c](https://github.com/user-attachments/assets/54419f86-dc85-48d1-8f8a-79268ae9ea6c)
 
-
 ## v0.3
 
 [v0.3 JLCPCB Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.3)
@@ -69,8 +68,6 @@ Version 0.2 improves upon some of the issues in v0.1, with some intentional choi
 * Fixed the alignment of the F5 key
 * **Controversial** - Changed the switch footprint to normal MX soldered switches instead of Kailh hotswap footprints. This allows for simpler boards that don't require a top plate.
 
-(pictures to be added later)
-
 ## Version v0.1
 
 Version 0.1 _works_ but there are some issues:
@@ -86,9 +83,6 @@ in the build process. It requires more parts, and I had to 3D print 3.4mm M2 spa
 
 ![PCB Front](https://i.imgur.com/pEsHZqL.jpeg)
 ![PCB Back](https://i.imgur.com/iWDIUL9.jpeg)
-![Assembled Front](https://i.imgur.com/rEM1gKr.jpeg)
-![Assembled Back](https://i.imgur.com/TvYkt1t.jpeg)
-![Plugged in and working](https://i.imgur.com/G42Mo8T.jpeg)
 
 ## Production Files
 
