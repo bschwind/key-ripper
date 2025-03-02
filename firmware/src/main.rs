@@ -15,7 +15,11 @@ use crate::{
     hid_class::HidClass,
     key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING},
 };
-use core::{cell::RefCell, convert::Infallible};
+use core::{
+    cell::RefCell,
+    convert::Infallible,
+    sync::atomic::{AtomicBool, Ordering},
+};
 use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use critical_section::Mutex;
 use debounce::Debounce;
@@ -59,6 +63,8 @@ static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 /// The USB Human Interface Device Driver (shared with the interrupt).
 static USB_HID_CLASS: Mutex<RefCell<Option<HidClass<usb::UsbBus>>>> =
     Mutex::new(RefCell::new(None));
+
+static ATTEMPT_REMOTE_WAKEUP: AtomicBool = AtomicBool::new(false);
 
 #[defmt::panic_handler]
 fn panic() -> ! {
@@ -218,6 +224,10 @@ fn main() -> ! {
                         last_report = report;
                     }
                 });
+
+                // If the input report has changed, we should attempt a remote wakeup
+                // if the device is suspended.
+                ATTEMPT_REMOTE_WAKEUP.store(true, Ordering::Relaxed);
             }
         }
     }
@@ -234,5 +244,14 @@ unsafe fn USBCTRL_IRQ() {
         let hid_class = hid_class.as_mut().unwrap();
 
         usb_dev.poll(&mut [hid_class]);
+
+        if usb_dev.state() == UsbDeviceState::Suspend
+            && usb_dev.remote_wakeup_enabled()
+            && ATTEMPT_REMOTE_WAKEUP.load(Ordering::Relaxed)
+        {
+            usb_dev.bus().remote_wakeup();
+        }
+
+        ATTEMPT_REMOTE_WAKEUP.store(false, Ordering::Relaxed);
     });
 }
