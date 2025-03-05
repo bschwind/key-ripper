@@ -165,6 +165,9 @@ fn main() -> ! {
         USB_BUS = Some(bus_allocator);
         // We are promising to the compiler not to take mutable access to this global
         // variable while this reference exists!
+
+        // TODO(bschwind) - Fix this lint: https://doc.rust-lang.org/nightly/edition-guide/rust-2024/static-mut-references.html
+        #[allow(static_mut_refs)]
         USB_BUS.as_ref().unwrap()
     };
 
@@ -237,6 +240,8 @@ fn main() -> ! {
 #[allow(non_snake_case)]
 #[interrupt]
 unsafe fn USBCTRL_IRQ() {
+    // TODO(bschwind) - Fix this lint: https://doc.rust-lang.org/nightly/edition-guide/rust-2024/static-mut-references.html
+    #[allow(static_mut_refs)]
     let usb_dev = USB_DEVICE.as_mut().unwrap();
 
     critical_section::with(|cs| {
