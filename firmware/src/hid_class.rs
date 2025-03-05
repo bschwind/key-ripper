@@ -30,6 +30,27 @@ const HID_DESCRIPTOR: [u8; 7] = [
     DESCRIPTOR_LEN_BYTES[1], // wDescriptorLength - LSB first
 ];
 
+#[derive(Debug, Default, Copy, Clone)]
+pub struct LedState {
+    num_lock: bool,
+    caps_lock: bool,
+    scroll_lock: bool,
+    compose: bool,
+    kana: bool,
+}
+
+impl From<u8> for LedState {
+    fn from(byte: u8) -> Self {
+        Self {
+            num_lock: byte & 1 == 1,
+            caps_lock: (byte >> 1) & 1 == 1,
+            scroll_lock: (byte >> 2) & 1 == 1,
+            compose: (byte >> 3) & 1 == 1,
+            kana: (byte >> 4) & 1 == 1,
+        }
+    }
+}
+
 // A HID device is composed of the following endpoints:
 // * A pair of control IN and OUT endpoints called the default endpoint
 //   (these are handled by usb-device?)
@@ -52,6 +73,9 @@ pub struct HidClass<'a, B: UsbBus> {
     // if declared.
     // out_endpoint: EndpointOut<'a, B>,
     _bus: PhantomData<B>,
+
+    last_report: [u8; 8],
+    led_state: LedState,
 }
 
 impl<'a, B: UsbBus> HidClass<'a, B> {
@@ -64,11 +88,24 @@ impl<'a, B: UsbBus> HidClass<'a, B> {
         let poll_interval = 1;
         let in_endpoint = bus_allocator.interrupt(max_packet_size, poll_interval);
 
-        Self { usb_interface, in_endpoint, _bus: PhantomData {} }
+        let last_report = [0; 8];
+
+        Self {
+            usb_interface,
+            in_endpoint,
+            _bus: PhantomData {},
+            last_report,
+            led_state: LedState::default(),
+        }
     }
 
-    pub fn write_raw_report(&self, data: &[u8]) -> Result<usize> {
-        self.in_endpoint.write(data)
+    pub fn write_raw_report(&mut self, data: [u8; 8]) -> Result<usize> {
+        self.last_report = data;
+        self.in_endpoint.write(&data)
+    }
+
+    pub fn led_state(&self) -> LedState {
+        self.led_state
     }
 }
 
@@ -144,7 +181,25 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
     fn poll(&mut self) {}
 
     fn control_out(&mut self, xfer: ControlOut<B>) {
-        let _ = xfer;
+        const SET_REPORT_REQUEST: u8 = 0x09;
+
+        let request = xfer.request();
+
+        let interface = request.index;
+        if interface != u8::from(self.usb_interface) as u16 {
+            return;
+        }
+
+        if request.request == SET_REPORT_REQUEST {
+            let data_len = xfer.data().len();
+
+            if data_len > 0 {
+                // The keyboard OUT report is 1 byte for the LED state.
+                self.led_state = LedState::from(xfer.data()[0]);
+            }
+
+            xfer.accept().ok();
+        }
     }
 
     // The Control pipe is used for:
@@ -152,6 +207,13 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
     // * Transmitting data when polled by the HID class driver (using the Get_Report request).
     // * Receiving data from the host.
     fn control_in(&mut self, xfer: ControlIn<B>) {
+        const GET_REPORT_REQUEST: u8 = 0x01;
+        // const GET_IDLE_REQUEST: u8 = 0x02;
+        // const GET_PROTOCOL_REQUEST: u8 = 0x03;
+        // const SET_REPORT_REQUEST: u8 = 0x09;
+        // const SET_IDLE_REQUEST: u8 = 0x0A;
+        // const SET_PROTOCOL_REQUEST: u8 = 0x0B;
+
         let request = xfer.request();
 
         let interface = request.index;
@@ -188,7 +250,17 @@ impl<B: UsbBus> UsbClass<B> for HidClass<'_, B> {
                     _ => {},
                 }
             },
-            (RequestType::Class, 0x0) => {},
+            (RequestType::Class, GET_REPORT_REQUEST) => {
+                const REPORT_TYPE_INPUT: u8 = 0x01;
+                // const REPORT_TYPE_OUTPUT: u8 = 0x02;
+                // const REPORT_TYPE_FEATURE: u8 = 0x03;
+
+                let [_report_id, report_type] = request.value.to_le_bytes();
+
+                if report_type == REPORT_TYPE_INPUT {
+                    xfer.accept_with(&self.last_report).ok();
+                }
+            },
             _ => {},
         }
     }
