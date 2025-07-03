@@ -30,6 +30,12 @@ Sadly I didn't get to cover everything I wanted to talk about when it comes to e
 * Order a PCB with the production files from the [latest release](https://github.com/bschwind/key-ripper/releases).
 * When you receive the board, plug it in via USB C and follow [the instruction to flash the firmware](https://github.com/bschwind/key-ripper/blob/main/firmware/README.md).
 
+## 3D Printed Case
+
+The STEP files for the case are available in the [case directory](./case).
+
+They were produced with Rust bindings to OpenCascade. You can find the code for the keyboard case [here](https://github.com/bschwind/opencascade-rs/blob/2eefc2c0322c1cb65bd3279fbedeba416aef8858/examples/src/keyboard_case.rs).
+
 ## Current Version (v0.3.1)
 
 [v0.3.1 PCBWay Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.3.1)
