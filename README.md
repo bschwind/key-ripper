@@ -36,6 +36,12 @@ The STEP files for the case are available in the [case directory](./case).
 
 They were produced with Rust bindings to OpenCascade. You can find the code for the keyboard case [here](https://github.com/bschwind/opencascade-rs/blob/2eefc2c0322c1cb65bd3279fbedeba416aef8858/examples/src/keyboard_case.rs).
 
+The case can be printed as two separate parts with a dovetail connection (use your slicer and cut up the parts for whatever suits your print bed size), or it can be printed as one full piece.
+
+The PCB can then be slotted into the case with the top edge first (the edge with the USB connector), then press the bottom edge in to fit it into the case. It's usually a snug fit. You can then use 4 M2x4 flat head "laptop screws" to secure the PCB in the middle two holes on the top and bottom edges.
+
+The case feet can be printed and pressed directly into the bottom of the case. The STEP files were printed on a Prusa MK4 and MK3S, both of which had successful tolerances for the press-fit of the case feet.
+
 ## Current Version (v0.3.1)
 
 [v0.3.1 PCBWay Production Files](https://github.com/bschwind/key-ripper/releases/tag/v0.3.1)
