@@ -22,7 +22,8 @@ Sadly I didn't get to cover everything I wanted to talk about when it comes to e
 * Full sized arrow keys with a gap (on the left and right) for easily finding the up arrow without looking
 * No right shift key (this allows for the arrow keys to sit below the Enter key, and I never use right shift)
 * Support for screw-in stabilizers first and foremost, along with snap-in stabilizers, and plate-mounted stabilizers when using a top plate
-* Easy to assemble - this will apply once I design a case for it
+* Can sit on top of a macbook keyboard
+* Easy to assemble - order a PCB, press it into the 3D printed case, and use 4 optional screws if the fit isn't snug
 * Firmware written in Rust, debuggable with knurling-rs
 
 ## Setup
