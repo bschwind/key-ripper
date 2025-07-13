@@ -3,7 +3,7 @@
 A keyboard personalized for myself, designed in KiCad, with custom firmware written in Rust.
 
 ![key-ripper](https://github.com/user-attachments/assets/ba4140b2-fec3-4083-b308-aad899887331)
-![feet](https://github.com/user-attachments/assets/78384776-8d7e-42a3-b9e4-88de4bbfe788)
+![feet](https://github.com/user-attachments/assets/e57fc158-6aa5-4175-9d55-40d19a09753a)
 ![macbook-keyboard](https://github.com/user-attachments/assets/e06ab6d2-830b-4dc9-9492-fdda7a4610b0)
 ![usb-c](https://github.com/user-attachments/assets/a858e3f2-c250-40af-a0dd-20148ce827b8)
 
