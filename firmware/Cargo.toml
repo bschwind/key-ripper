@@ -5,6 +5,11 @@ authors = ["Brian Schwind <brianmschwind@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0 OR Zlib"
 
+[[bin]]
+name = "key-ripper"
+test = false
+bench = false
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
