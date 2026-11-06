@@ -54,9 +54,6 @@ const NUM_ROWS: usize = 6;
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
-/// The USB Bus Driver (shared with the interrupt).
-static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
-
 /// The USB Device Driver and HID class (shared with the interrupt).
 static USB_RESOURCES: Mutex<RefCell<Option<UsbResources>>> = Mutex::new(RefCell::new(None));
 
@@ -155,17 +152,10 @@ fn main() -> ! {
         force_vbus_detect_bit,
         &mut pac.RESETS,
     );
-    let bus_allocator = UsbBusAllocator::new(usb_bus);
-    let bus_allocator_ref = unsafe {
-        // Note (safety): This is safe as interrupts haven't been started yet
-        USB_BUS = Some(bus_allocator);
-        // We are promising to the compiler not to take mutable access to this global
-        // variable while this reference exists!
 
-        // TODO(bschwind) - Fix this lint: https://doc.rust-lang.org/nightly/edition-guide/rust-2024/static-mut-references.html
-        #[allow(static_mut_refs)]
-        USB_BUS.as_ref().unwrap()
-    };
+    // The USB device and HID class hold references to the bus allocator, so it must live for the static lifetime.
+    let bus_allocator_ref =
+        cortex_m::singleton!(: UsbBusAllocator<UsbBus> = UsbBusAllocator::new(usb_bus)).unwrap();
 
     let hid_class = HidClass::new(bus_allocator_ref);
 
