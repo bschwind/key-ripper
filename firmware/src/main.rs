@@ -15,11 +15,7 @@ use crate::{
     hid_class::HidClass,
     key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING},
 };
-use core::{
-    cell::RefCell,
-    convert::Infallible,
-    sync::atomic::{AtomicBool, Ordering},
-};
+use core::{cell::RefCell, convert::Infallible};
 use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use critical_section::Mutex;
 use debounce::Debounce;
@@ -54,17 +50,8 @@ const NUM_ROWS: usize = 6;
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
-/// The USB Device Driver (shared with the interrupt).
-static mut USB_DEVICE: Option<UsbDevice<usb::UsbBus>> = None;
-
-/// The USB Bus Driver (shared with the interrupt).
-static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
-
-/// The USB Human Interface Device Driver (shared with the interrupt).
-static USB_HID_CLASS: Mutex<RefCell<Option<HidClass<usb::UsbBus>>>> =
-    Mutex::new(RefCell::new(None));
-
-static ATTEMPT_REMOTE_WAKEUP: AtomicBool = AtomicBool::new(false);
+/// The USB Device Driver and HID class (shared with the interrupt).
+static USB_RESOURCES: Mutex<RefCell<Option<UsbResources>>> = Mutex::new(RefCell::new(None));
 
 #[defmt::panic_handler]
 fn panic() -> ! {
@@ -159,35 +146,28 @@ fn main() -> ! {
         force_vbus_detect_bit,
         &mut pac.RESETS,
     );
-    let bus_allocator = UsbBusAllocator::new(usb_bus);
-    let bus_allocator_ref = unsafe {
-        // Note (safety): This is safe as interrupts haven't been started yet
-        USB_BUS = Some(bus_allocator);
-        // We are promising to the compiler not to take mutable access to this global
-        // variable while this reference exists!
 
-        // TODO(bschwind) - Fix this lint: https://doc.rust-lang.org/nightly/edition-guide/rust-2024/static-mut-references.html
-        #[allow(static_mut_refs)]
-        USB_BUS.as_ref().unwrap()
-    };
+    // The USB device and HID class hold references to the bus allocator, so it must live for the static lifetime.
+    let bus_allocator_ref =
+        cortex_m::singleton!(: UsbBusAllocator<UsbBus> = UsbBusAllocator::new(usb_bus)).unwrap();
 
     let hid_class = HidClass::new(bus_allocator_ref);
 
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
     let keyboard_usb_device = UsbDeviceBuilder::new(bus_allocator_ref, UsbVidPid(0x16c0, 0x27db))
         .supports_remote_wakeup(true)
+        // See: https://docs.rs/rp2040-hal/0.12.0/rp2040_hal/usb/index.html#enumeration-issue-with-small-ep0-max-packet-size
+        .max_packet_size_0(64)
+        .unwrap()
         .strings(&[StringDescriptors::default().manufacturer("bschwind").product("key ripper")])
         .unwrap()
         .build();
 
-    unsafe {
-        // Note (safety): This is safe as interrupts haven't been started yet
-        critical_section::with(|cs| {
-            USB_HID_CLASS.replace(cs, Some(hid_class));
-        });
+    critical_section::with(|cs| {
+        USB_RESOURCES
+            .replace(cs, Some(UsbResources { usb_device: keyboard_usb_device, hid_class }));
+    });
 
-        USB_DEVICE = Some(keyboard_usb_device);
-    }
     info!("Enabling USB interrupt handler");
     unsafe {
         pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
@@ -206,8 +186,11 @@ fn main() -> ! {
 
             if report != last_report {
                 critical_section::with(|cs| {
-                    let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
-                    let hid_class = hid_class.as_mut().unwrap();
+                    let mut usb_resources = USB_RESOURCES.borrow_ref_mut(cs);
+                    let Some(UsbResources { usb_device, hid_class }) = usb_resources.as_mut()
+                    else {
+                        return;
+                    };
 
                     if let Err(err) = hid_class.write_raw_report(&report.as_raw_input()) {
                         match err {
@@ -226,37 +209,35 @@ fn main() -> ! {
                         // Only assign to last_report if it was successfully reported.
                         last_report = report;
                     }
-                });
 
-                // If the input report has changed, we should attempt a remote wakeup
-                // if the device is suspended.
-                ATTEMPT_REMOTE_WAKEUP.store(true, Ordering::Relaxed);
+                    // If the input report has changed, we should attempt a remote wakeup
+                    // if the device is suspended.
+                    if usb_device.state() == UsbDeviceState::Suspend
+                        && usb_device.remote_wakeup_enabled()
+                    {
+                        usb_device.bus().remote_wakeup();
+                    }
+                });
             }
         }
     }
+}
+
+struct UsbResources {
+    usb_device: UsbDevice<'static, usb::UsbBus>,
+    hid_class: HidClass<'static, usb::UsbBus>,
 }
 
 /// Handle USB interrupts
 #[allow(non_snake_case)]
 #[interrupt]
 unsafe fn USBCTRL_IRQ() {
-    // TODO(bschwind) - Fix this lint: https://doc.rust-lang.org/nightly/edition-guide/rust-2024/static-mut-references.html
-    #[allow(static_mut_refs)]
-    let usb_dev = USB_DEVICE.as_mut().unwrap();
-
     critical_section::with(|cs| {
-        let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
-        let hid_class = hid_class.as_mut().unwrap();
+        let mut usb_resources = USB_RESOURCES.borrow_ref_mut(cs);
+        let Some(UsbResources { usb_device, hid_class }) = usb_resources.as_mut() else {
+            return;
+        };
 
-        usb_dev.poll(&mut [hid_class]);
-
-        if usb_dev.state() == UsbDeviceState::Suspend
-            && usb_dev.remote_wakeup_enabled()
-            && ATTEMPT_REMOTE_WAKEUP.load(Ordering::Relaxed)
-        {
-            usb_dev.bus().remote_wakeup();
-        }
-
-        ATTEMPT_REMOTE_WAKEUP.store(false, Ordering::Relaxed);
+        usb_device.poll(&mut [hid_class]);
     });
 }
