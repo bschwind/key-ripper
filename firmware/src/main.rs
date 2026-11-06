@@ -176,6 +176,9 @@ fn main() -> ! {
     // https://github.com/obdev/v-usb/blob/7a28fdc685952412dad2b8842429127bc1cf9fa7/usbdrv/USB-IDs-for-free.txt#L128
     let keyboard_usb_device = UsbDeviceBuilder::new(bus_allocator_ref, UsbVidPid(0x16c0, 0x27db))
         .supports_remote_wakeup(true)
+        // See: https://docs.rs/rp2040-hal/0.12.0/rp2040_hal/usb/index.html#enumeration-issue-with-small-ep0-max-packet-size
+        .max_packet_size_0(64)
+        .unwrap()
         .strings(&[StringDescriptors::default().manufacturer("bschwind").product("key ripper")])
         .unwrap()
         .build();
