@@ -54,15 +54,11 @@ const NUM_ROWS: usize = 6;
 
 const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
-/// The USB Device Driver (shared with the interrupt).
-static mut USB_DEVICE: Option<UsbDevice<usb::UsbBus>> = None;
-
 /// The USB Bus Driver (shared with the interrupt).
 static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBus>> = None;
 
-/// The USB Human Interface Device Driver (shared with the interrupt).
-static USB_HID_CLASS: Mutex<RefCell<Option<HidClass<usb::UsbBus>>>> =
-    Mutex::new(RefCell::new(None));
+/// The USB Device Driver and HID class (shared with the interrupt).
+static USB_RESOURCES: Mutex<RefCell<Option<UsbResources>>> = Mutex::new(RefCell::new(None));
 
 static ATTEMPT_REMOTE_WAKEUP: AtomicBool = AtomicBool::new(false);
 
@@ -183,14 +179,11 @@ fn main() -> ! {
         .unwrap()
         .build();
 
-    unsafe {
-        // Note (safety): This is safe as interrupts haven't been started yet
-        critical_section::with(|cs| {
-            USB_HID_CLASS.replace(cs, Some(hid_class));
-        });
+    critical_section::with(|cs| {
+        USB_RESOURCES
+            .replace(cs, Some(UsbResources { usb_device: keyboard_usb_device, hid_class }));
+    });
 
-        USB_DEVICE = Some(keyboard_usb_device);
-    }
     info!("Enabling USB interrupt handler");
     unsafe {
         pac::NVIC::unmask(pac::Interrupt::USBCTRL_IRQ);
@@ -209,8 +202,11 @@ fn main() -> ! {
 
             if report != last_report {
                 critical_section::with(|cs| {
-                    let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
-                    let hid_class = hid_class.as_mut().unwrap();
+                    let mut usb_resources = USB_RESOURCES.borrow_ref_mut(cs);
+                    let Some(UsbResources { usb_device: _, hid_class }) = usb_resources.as_mut()
+                    else {
+                        return;
+                    };
 
                     if let Err(err) = hid_class.write_raw_report(&report.as_raw_input()) {
                         match err {
@@ -239,25 +235,28 @@ fn main() -> ! {
     }
 }
 
+struct UsbResources {
+    usb_device: UsbDevice<'static, usb::UsbBus>,
+    hid_class: HidClass<'static, usb::UsbBus>,
+}
+
 /// Handle USB interrupts
 #[allow(non_snake_case)]
 #[interrupt]
 unsafe fn USBCTRL_IRQ() {
-    // TODO(bschwind) - Fix this lint: https://doc.rust-lang.org/nightly/edition-guide/rust-2024/static-mut-references.html
-    #[allow(static_mut_refs)]
-    let usb_dev = USB_DEVICE.as_mut().unwrap();
-
     critical_section::with(|cs| {
-        let mut hid_class = USB_HID_CLASS.borrow_ref_mut(cs);
-        let hid_class = hid_class.as_mut().unwrap();
+        let mut usb_resources = USB_RESOURCES.borrow_ref_mut(cs);
+        let Some(UsbResources { usb_device, hid_class }) = usb_resources.as_mut() else {
+            return;
+        };
 
-        usb_dev.poll(&mut [hid_class]);
+        usb_device.poll(&mut [hid_class]);
 
-        if usb_dev.state() == UsbDeviceState::Suspend
-            && usb_dev.remote_wakeup_enabled()
+        if usb_device.state() == UsbDeviceState::Suspend
+            && usb_device.remote_wakeup_enabled()
             && ATTEMPT_REMOTE_WAKEUP.load(Ordering::Relaxed)
         {
-            usb_dev.bus().remote_wakeup();
+            usb_device.bus().remote_wakeup();
         }
 
         ATTEMPT_REMOTE_WAKEUP.store(false, Ordering::Relaxed);
