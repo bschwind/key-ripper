@@ -15,11 +15,7 @@ use crate::{
     hid_class::HidClass,
     key_scan::{KeyboardReport, TRANSPOSED_NORMAL_LAYER_MAPPING},
 };
-use core::{
-    cell::RefCell,
-    convert::Infallible,
-    sync::atomic::{AtomicBool, Ordering},
-};
+use core::{cell::RefCell, convert::Infallible};
 use cortex_m::prelude::_embedded_hal_timer_CountDown;
 use critical_section::Mutex;
 use debounce::Debounce;
@@ -56,8 +52,6 @@ const EXTERNAL_CRYSTAL_FREQUENCY_HZ: u32 = 12_000_000;
 
 /// The USB Device Driver and HID class (shared with the interrupt).
 static USB_RESOURCES: Mutex<RefCell<Option<UsbResources>>> = Mutex::new(RefCell::new(None));
-
-static ATTEMPT_REMOTE_WAKEUP: AtomicBool = AtomicBool::new(false);
 
 #[defmt::panic_handler]
 fn panic() -> ! {
@@ -193,7 +187,7 @@ fn main() -> ! {
             if report != last_report {
                 critical_section::with(|cs| {
                     let mut usb_resources = USB_RESOURCES.borrow_ref_mut(cs);
-                    let Some(UsbResources { usb_device: _, hid_class }) = usb_resources.as_mut()
+                    let Some(UsbResources { usb_device, hid_class }) = usb_resources.as_mut()
                     else {
                         return;
                     };
@@ -215,11 +209,15 @@ fn main() -> ! {
                         // Only assign to last_report if it was successfully reported.
                         last_report = report;
                     }
-                });
 
-                // If the input report has changed, we should attempt a remote wakeup
-                // if the device is suspended.
-                ATTEMPT_REMOTE_WAKEUP.store(true, Ordering::Relaxed);
+                    // If the input report has changed, we should attempt a remote wakeup
+                    // if the device is suspended.
+                    if usb_device.state() == UsbDeviceState::Suspend
+                        && usb_device.remote_wakeup_enabled()
+                    {
+                        usb_device.bus().remote_wakeup();
+                    }
+                });
             }
         }
     }
@@ -241,14 +239,5 @@ unsafe fn USBCTRL_IRQ() {
         };
 
         usb_device.poll(&mut [hid_class]);
-
-        if usb_device.state() == UsbDeviceState::Suspend
-            && usb_device.remote_wakeup_enabled()
-            && ATTEMPT_REMOTE_WAKEUP.load(Ordering::Relaxed)
-        {
-            usb_device.bus().remote_wakeup();
-        }
-
-        ATTEMPT_REMOTE_WAKEUP.store(false, Ordering::Relaxed);
     });
 }
